@@ -58,10 +58,10 @@ export default function Sidebar() {
               key={to}
               to={to}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
+                `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 border active:scale-[0.97] ${
                   isActive
-                    ? 'bg-accent-amber/15 text-accent-amber-light border border-accent-amber/20'
-                    : 'text-gray-400 hover:text-gray-100 hover:bg-dark-600'
+                    ? 'bg-accent-amber/10 backdrop-blur-md text-accent-amber-light border-accent-amber/35 shadow-md shadow-accent-amber/5 font-semibold'
+                    : 'text-gray-400 border-transparent hover:text-gray-100 hover:bg-white/5 hover:backdrop-blur-sm hover:border-white/10'
                 }`
               }
             >
