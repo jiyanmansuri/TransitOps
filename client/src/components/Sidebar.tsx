@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Truck, Users, Map, Wrench,
-  Fuel, BarChart3, Settings, LogOut, Zap
+  Fuel, BarChart3, Settings, LogOut, Compass
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { canAccess, Module } from '../hooks/useRBAC';
@@ -40,7 +40,7 @@ export default function Sidebar() {
       <div className="p-5 border-b border-dark-500/80 bg-gradient-to-b from-black to-transparent">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-dark-700 to-dark-800 border border-dark-500 flex items-center justify-center shadow-lg shadow-black/80 hover:border-accent-amber/40 transition-all duration-500 group cursor-pointer">
-            <Zap size={16} className="text-accent-amber drop-shadow-[0_0_6px_rgba(245,158,11,0.6)] group-hover:scale-110 transition-transform duration-300" />
+            <Compass size={16} className="text-accent-amber drop-shadow-[0_0_6px_rgba(245,158,11,0.6)] group-hover:rotate-45 transition-transform duration-500" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
