@@ -1,79 +1,145 @@
-# TransitOps — Smart Transport Operations Platform
+# TransitOps: Enterprise Fleet & Smart Operations Management System
+### *Odoo Ecosystem Integration Blueprint & Operational Command Center*
 
-TransitOps is a centralized, full-stack logistics management platform built for modern fleet operators. It enables real-time orchestration of vehicles, drivers, trips, maintenance, and analytics, protected by strict role-based access control (RBAC).
-
----
-
-## 🚀 Key Features
-
-1. **Operations Dashboard:** Live KPI tracking (utilization, active trips, shop status) and a stacked status breakdown bar.
-2. **Vehicle Registry:** Complete vehicle CRUD operations enforcing unique registration numbers and tracking statuses.
-3. **Drivers & Safety Profiles:** Expiry notifications for licenses and safety score metrics. Preventative assignment rules block suspended or expired drivers.
-4. **Trip Dispatcher (Centerpiece):** Multi-step dispatch flow (Draft → Dispatched → Completed / Cancelled) with automatic payload capacity validation.
-5. **Servicing & Maintenance:** Atomic status transitions. Scheduling a service moves a vehicle to "In Shop" automatically, and closing it returns it to "Available".
-6. **Fuel & Expenses:** Automated log tracking calculating overall operational costs dynamically.
-7. **Analytics & ROI Reports:** High-performance KPIs and charts including Monthly Revenue tracking and Vehicle ROI calculated as:
-   $$\text{ROI} = \frac{\text{Revenue} - (\text{Maintenance} + \text{Fuel})}{\text{Acquisition Cost}} \times 100\%$$
-8. **Role-Based Access Control (RBAC):** Real route guarding protecting routes and API endpoints for four distinct roles.
+TransitOps is a unified, full-stack logistics resource planning (LRP) engine designed to bridge the gap between **Fleet Management**, **Human Resources**, **Maintenance Operations**, and **Financial Ledger Systems**. Built as a high-performance prototype for enterprise logistics pipelines, it demonstrates a complete state-synchronization machine, role-based access controls (RBAC), and transactional compliance.
 
 ---
 
-## 🛠 Tech Stack
+## 🏛 Executive Summary & Business Architecture
 
-*   **Frontend:** React (v18) + TypeScript + Tailwind CSS + Recharts + React Query (v5) + React Router (v6)
-*   **Backend:** Node.js + Express + TypeScript
-*   **Database:** SQLite + Prisma ORM
-*   **Authentication:** JWT-based session security with role-claims and 5-attempt brute-force lockouts.
+Logistics companies often suffer from fragmented operational data. Maintenance records, fuel receipts, driver compliance, and dispatch routes typically live in siloed applications. TransitOps resolves this by consolidating these domains into a single, cohesive state machine:
 
----
-
-## ⚙️ Getting Started
-
-### Prerequisites
-*   Node.js (v18 or higher)
-*   npm (v9 or higher)
-
-### 1. Clone & Install Dependencies
-Clone the repository, go into the project folder, and run:
-```bash
-# Install root dependencies
-npm install --legacy-peer-deps
-
-# Install server and client dependencies
-npm run setup
+```mermaid
+graph TD
+    A[Driver Registry & Compliance] -->|Eligibility Check| C[Trip Dispatcher]
+    B[Vehicle Registry & CAPEX] -->|Capacity Validation| C
+    C -->|Dispatch Trip| D[Active Fleet Operations]
+    D -->|Complete Trip| E[OPEX & Financial Ledger]
+    F[Maintenance Records] -->|Active Shop Status| B
+    E -->|Aggregate Data| G[ROI & Fleet Analytics]
 ```
 
-### 2. Database Migration & Seeding
-Initialize the SQLite database schema and load seed data:
-```bash
-# Generate the Prisma client
-npm run prisma:generate
+### Core Business Pillars
+1. **Unified Dispatch Pipeline:** Strict cargo weight checking against vehicle payload capacity, ensuring safety and preventing mechanical overload.
+2. **HR & Safety Compliance:** Automatically blocks suspended drivers or operators with expired commercial licenses from route assignment.
+3. **OPEX & Depreciation Tracking:** Captures fuel efficiency and logs toll/miscellaneous expenses, translating them automatically into operational cost ledgers.
+4. **Maintenance State-Machine Sync:** Active maintenance triggers lockouts on vehicles, moving them out of the dispatch pool until certified as "Available" by a Fleet Manager.
 
-# Push schema to SQLite
-npm run prisma:push
+---
 
-# Load seed data (creates demo accounts, vehicles, drivers, and trips)
-npm run seed
+## 🛠 Tech Stack & Systems Design
+
+The architecture is built for rapid deployment, strict type safety, and transactional ACID compliance:
+
+*   **Frontend Client:** React 18, TypeScript, Tailwind CSS, Recharts (data visualization), React Query v5 (state caching and automatic background refetching), React Router v6.
+*   **Backend Server:** Node.js, Express, TypeScript.
+*   **Data Tier:** SQLite engine, managed via Prisma ORM.
+*   **Authentication & Security:** JSON Web Tokens (JWT) with encoded role payloads, incorporating temporary account lockout security (5 failed attempts locks the operator for 15 minutes).
+
+### ACID Compliance & Transactional Integrity
+State transitions are wrapped in atomic database transactions (`prisma.$transaction`). For example, when completing a trip:
+1. The **Trip** status changes to `Completed` with final odometer and fuel readings.
+2. The **Vehicle** odometer is updated and its status is set back to `Available`.
+3. The **Driver** status is set back to `Available`.
+4. A **FuelLog** entry is logged, calculating total fuel cost based on liters consumed.
+5. An **Expense** record is instantiated, tracking tolls and driver incidentals.
+
+If any of these updates fail, the entire transaction is rolled back, preventing orphaned trips or desynced vehicle registers.
+
+---
+
+## 📊 Fleet Analytics & ROI Calculations
+
+TransitOps implements a live financial calculation engine mapping operational expenses (OPEX) against capital expenditures (CAPEX):
+
+### 1. Return on Investment (ROI)
+For each vehicle asset, the Return on Investment is calculated dynamically based on generated trip revenue vs. operational costs relative to its acquisition price:
+$$\text{ROI} = \frac{\text{Trip Revenue} - (\text{Maintenance Costs} + \text{Fuel Costs})}{\text{Acquisition Cost}} \times 100\%$$
+*Where Trip Revenue is calculated dynamically as $\text{Planned Distance (km)} \times ₹15/\text{km}$ for completed trips.*
+
+### 2. Fleet Utilization
+Tracks the percentage of active resources deployed relative to the total registered fleet:
+$$\text{Fleet Utilization} = \frac{\text{Vehicles On Trip}}{\text{Total Fleet (Excluding Retired)}} \times 100\%$$
+
+---
+
+## 🔌 Odoo Integration Strategy (API Blueprint)
+
+TransitOps is designed to serve as a high-speed operational gateway that interfaces with an **Odoo ERP** instance (supporting Odoo Enterprise v16/v17). By leveraging Odoo's external API connector, TransitOps acts as the real-time driver/dispatcher interface while syncing core accounting data back to Odoo.
+
+```text
+  [ TransitOps Client ]  <--->  [ TransitOps Server ]
+                                          |
+                                    (JSON-RPC API)
+                                          |
+                                          v
+                      +---------------------------------------+
+                      |               Odoo ERP                |
+                      |  - hr.employee (Drivers)              |
+                      |  - fleet.vehicle (Assets)             |
+                      |  - account.move (Expenses / Invoices)  |
+                      +---------------------------------------+
 ```
 
-### 3. Run Locally
-Start both the Express backend server (port 3001) and Vite frontend development client (port 5173) concurrently:
+### Model Mapping Blueprint
+
+| TransitOps Model | Odoo Core Model | Sync Trigger |
+| :--- | :--- | :--- |
+| **Driver** | `hr.employee` (with driver license attributes) | Onboarded driver syncs to Odoo HR. |
+| **Vehicle** | `fleet.vehicle` | Asset registration syncs to Odoo Fleet module. |
+| **FuelLog** | `fleet.vehicle.log.fuel` | Trip completion creates a fuel expense line in Odoo. |
+| **Expense** | `account.move` / `hr.expense` | Tolls and incidentals post directly as journal entries. |
+| **MaintenanceRecord** | `fleet.vehicle.log.services` | Active service logs register in Odoo Maintenance. |
+
+---
+
+## 🚀 Setup & Execution Guide
+
+### Installation
+Ensure Node.js (v18+) is installed on your local system.
+
+1. Clone the project and install root dependencies:
+   ```bash
+   npm install --legacy-peer-deps
+   ```
+2. Initialize and configure workspace package trees:
+   ```bash
+   npm run setup
+   ```
+3. Generate the Prisma database client and push the schema:
+   ```bash
+   npm run prisma:generate
+   npm run prisma:push
+   ```
+4. Load the mock database seed (creates demo vehicles, drivers, and user role profiles):
+   ```bash
+   npm run seed
+   ```
+
+### Running the Application
+Launch both the backend server and the frontend client concurrently:
 ```bash
 npm run dev
 ```
 
-*   **Web Console:** [http://localhost:5173](http://localhost:5173)
-*   **API Gateway:** [http://localhost:3001](http://localhost:3001)
+*   **Frontend Dashboard Console:** [http://localhost:5173](http://localhost:5173)
+*   **Backend REST Gateway:** [http://localhost:3001](http://localhost:3001)
 
 ---
 
-## 🔑 Demo Access Profiles
+## 🔐 Role-Based Access Control (RBAC) Matrix
 
-Log in using any of the following email addresses (all accounts use the password **`demo1234`**):
+transitOps enforces route guarding on both the UI navigation and API endpoints according to the following permissions:
 
-| Role | Email | Module Permissions |
-| :--- | :--- | :--- |
-| **Fleet Manager** | `fleet@demo.com` | Fleet (Edit), Drivers (Edit), Maintenance (Edit), Analytics (Edit), Settings (Edit) |
-| **Dispatcher** | `dispatch@demo.com` | Fleet (View), Trips (Edit) |
-| **Safety Officer** | `safety@demo.com` | Drivers (Edit), Trips (View) |
-| **Financial Analyst** | `finance@demo.com` | Fleet (View), Fuel & Expenses (Edit), Analytics (Edit) |
+| Access Role | Fleet Module | Drivers Module | Trips Module | Fuel/Exp Module | Analytics Module |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Fleet Manager** | `✓ Edit` | `✓ Edit` | `—` | `—` | `✓ Edit` |
+| **Dispatcher** | `view` | `—` | `✓ Edit` | `—` | `—` |
+| **Safety Officer** | `—` | `✓ Edit` | `view` | `—` | `—` |
+| **Financial Analyst** | `view` | `—` | `—` | `✓ Edit` | `✓ Edit` |
+
+### Demo Access Credentials (Password: `demo1234`)
+*   💼 **Fleet Manager:** `fleet@demo.com`
+*   🚚 **Dispatcher:** `dispatch@demo.com`
+*   🛡️ **Safety Officer:** `safety@demo.com`
+*   📊 **Financial Analyst:** `finance@demo.com`
