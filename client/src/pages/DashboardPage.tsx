@@ -35,6 +35,7 @@ interface Trip {
   driverId: string;
   vehicle: { registrationNumber: string; nameModel: string; type: string };
   driver: { name: string };
+  createdAt: string;
 }
 
 interface Driver {
@@ -90,13 +91,6 @@ export default function DashboardPage() {
   }
 
   // --- Dynamic Filtering Logic ---
-  const filteredVehicles = vehicles.filter(v => {
-    const matchesType = typeFilter === 'All' || v.type.toLowerCase() === typeFilter.toLowerCase();
-    const matchesStatus = statusFilter === 'All' || v.status === statusFilter;
-    return matchesType && matchesStatus;
-  });
-
-  // Calculate vehicle-level metrics (reacts to typeFilter)
   const statsVehicles = vehicles.filter(v => typeFilter === 'All' || v.type.toLowerCase() === typeFilter.toLowerCase());
   const totalVehicles = statsVehicles.length;
   const activeVehicles = statsVehicles.filter(v => v.status !== 'Retired').length;
@@ -117,11 +111,13 @@ export default function DashboardPage() {
     { name: 'Retired', value: retiredVehicles, key: 'Retired' },
   ];
 
-  // Calculate trip-level metrics (reacts to typeFilter via vehicle links)
+  // Calculate trip-level metrics (reacts to typeFilter & statusFilter)
   const statsTrips = trips.filter(t => {
     const vehicle = vehicles.find(v => v.id === t.vehicleId);
     if (!vehicle) return false;
-    return typeFilter === 'All' || vehicle.type.toLowerCase() === typeFilter.toLowerCase();
+    const matchesType = typeFilter === 'All' || vehicle.type.toLowerCase() === typeFilter.toLowerCase();
+    const matchesStatus = statusFilter === 'All' || t.status === statusFilter;
+    return matchesType && matchesStatus;
   });
 
   const activeTrips = statsTrips.filter(t => t.status === 'Dispatched').length;
@@ -130,11 +126,20 @@ export default function DashboardPage() {
   // Active drivers count
   const driversOnDuty = drivers.filter(d => d.status === 'OnTrip').length;
 
-  // Calculate fuel efficiency of completed trips matching selected vehicle type
+  // Calculate fuel efficiency of completed trips matching selected vehicle type and status filter
   const completedTrips = statsTrips.filter(t => t.status === 'Completed' && t.fuelConsumed && t.plannedDistanceKm);
   const totalDistance = completedTrips.reduce((sum, t) => sum + t.plannedDistanceKm, 0);
   const totalFuel = completedTrips.reduce((sum, t) => sum + (t.fuelConsumed || 0), 0);
   const fuelEfficiency = totalFuel > 0 ? Math.round((totalDistance / totalFuel) * 10) / 10 : 0;
+
+  // Dynamic monthly revenue calculation (reacts to filters)
+  const monthlyRevenue: Record<string, number> = {};
+  completedTrips.forEach(t => {
+    const date = t.createdAt ? new Date(t.createdAt) : new Date();
+    const month = date.toLocaleString('default', { month: 'short', year: '2-digit' });
+    monthlyRevenue[month] = (monthlyRevenue[month] || 0) + t.plannedDistanceKm * 15;
+  });
+  const monthlyRevenueArr = Object.entries(monthlyRevenue).map(([month, revenue]) => ({ month, revenue }));
 
   // Types list for drop-down filter
   const vehicleTypes = Array.from(new Set(vehicles.map(v => v.type)));
@@ -181,10 +186,10 @@ export default function DashboardPage() {
             className="select py-1.5 text-xs w-40"
           >
             <option value="All">All Statuses</option>
-            <option value="Available">Available</option>
-            <option value="OnTrip">On Trip</option>
-            <option value="InShop">In Shop</option>
-            <option value="Retired">Retired</option>
+            <option value="Draft">Draft</option>
+            <option value="Dispatched">Dispatched</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
           </select>
         </div>
         
@@ -287,6 +292,24 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Monthly Revenue Chart */}
+      {monthlyRevenueArr.length > 0 && (
+        <div className="card">
+          <h2 className="section-title">Monthly Revenue (₹) — Filtered</h2>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={monthlyRevenueArr} margin={{ left: 0, right: 20 }}>
+              <XAxis dataKey="month" tick={{ fill: '#9ca3af', fontSize: 10 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fill: '#9ca3af', fontSize: 10 }} axisLine={false} tickLine={false} />
+              <Tooltip
+                contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: 8 }}
+                formatter={(v: number) => [`₹${v.toLocaleString()}`, 'Revenue']}
+              />
+              <Bar dataKey="revenue" fill="#d97706" radius={[4, 4, 0, 0]} maxBarSize={48} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 }
