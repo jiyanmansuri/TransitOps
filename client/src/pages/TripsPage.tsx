@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { Plus, AlertTriangle, CheckCircle, XCircle, ArrowRight, Navigation } from 'lucide-react';
 import api from '../api/client';
 import StatusBadge from '../components/StatusBadge';
@@ -39,8 +40,20 @@ export default function TripsPage() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const canEdit = canAccess(user?.role || '', 'Trips', 'edit');
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [showCreate, setShowCreate] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('create') === 'true') {
+      setShowCreate(true);
+    }
+  }, [searchParams]);
+
+  const closeCreateModal = () => {
+    setShowCreate(false);
+    setSearchParams({});
+  };
   const [showComplete, setShowComplete] = useState<Trip | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [completeForm, setCompleteForm] = useState(emptyCompleteForm);
@@ -70,7 +83,7 @@ export default function TripsPage() {
     mutationFn: (data: typeof form) => api.post('/trips', data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['trips'] });
-      setShowCreate(false);
+      closeCreateModal();
       setForm(emptyForm);
       setFormError('');
       setCapacityWarning('');
@@ -287,7 +300,7 @@ export default function TripsPage() {
 
       {/* Create Trip Modal */}
       {showCreate && (
-        <Modal title="Create Trip" onClose={() => setShowCreate(false)} size="lg">
+        <Modal title="Create Trip" onClose={closeCreateModal} size="lg">
           <form onSubmit={e => { e.preventDefault(); createMutation.mutate(form); }} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -355,7 +368,7 @@ export default function TripsPage() {
             )}
 
             <div className="flex gap-3 justify-end pt-2">
-              <button type="button" onClick={() => setShowCreate(false)} className="btn-secondary">Cancel</button>
+              <button type="button" onClick={closeCreateModal} className="btn-secondary">Cancel</button>
               <button type="submit" disabled={createMutation.isPending} className="btn-primary">
                 {createMutation.isPending ? 'Creating...' : 'Create Trip (Draft)'}
               </button>
