@@ -46,7 +46,7 @@ interface Driver {
 const STATUS_COLORS = {
   Available: '#10b981',
   OnTrip: '#3b82f6',
-  InShop: '#71639e',
+  InShop: '#7c3aed',
   Retired: '#ef4444',
 };
 

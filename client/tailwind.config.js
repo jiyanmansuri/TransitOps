@@ -4,19 +4,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Override Tailwind's amber palette → Odoo purple shades
+        // Override Tailwind's amber palette → vivid electric violet shades
         amber: {
-          50:  '#f2f0f9',
-          100: '#e6e1f3',
-          200: '#cfc5e7',
-          300: '#b1a1d7',
-          400: '#8f7fc2', // light Odoo purple
-          500: '#71639e', // Odoo primary purple
-          600: '#5a4d87',
-          700: '#483d6d',
-          800: '#383056',
-          900: '#2b2643',
-          950: '#1b172a',
+          50:  '#f5f3ff',
+          100: '#ede9fe',
+          200: '#ddd6fe',
+          300: '#c4b5fd',
+          400: '#a78bfa', // vivid violet light
+          500: '#7c3aed', // electric violet primary
+          600: '#6d28d9',
+          700: '#5b21b6',
+          800: '#4c1d95',
+          900: '#3b1679',
+          950: '#2e1065',
         },
         dark: {
           900: '#000000', // Absolute pure black canvas
@@ -27,8 +27,8 @@ export default {
           400: '#2c2c38', // Focus borders
         },
         accent: {
-          amber: '#71639e',       // Odoo primary purple
-          'amber-light': '#8f7fc2', // Odoo light purple
+          amber: '#7c3aed',       // Electric violet primary
+          'amber-light': '#a78bfa', // Vivid violet light
           blue: '#3b82f6',
           'blue-light': '#60a5fa',
           green: '#10b981',
@@ -41,7 +41,7 @@ export default {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
       boxShadow: {
-        'glow-amber': '0 0 15px rgba(113, 99, 158, 0.15)', // Odoo purple glow
+        'glow-amber': '0 0 20px rgba(124, 58, 237, 0.25)', // electric violet glow
         'glow-blue': '0 0 15px rgba(59, 130, 246, 0.15)',
         'glow-green': '0 0 15px rgba(16, 185, 129, 0.15)',
       }

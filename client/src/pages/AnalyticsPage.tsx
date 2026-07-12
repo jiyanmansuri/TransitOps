@@ -44,7 +44,7 @@ export default function AnalyticsPage() {
   const topCostliest = [...(vehicleRoi || [])].sort((a, b) => b.totalCost - a.totalCost).slice(0, 6);
   const topRoi = [...(vehicleRoi || [])].sort((a, b) => b.roi - a.roi).slice(0, 5);
 
-  const COLORS = ['#2b2643', '#483d6d', '#71639e', '#8f7fc2', '#b1a1d7', '#cfc5e7'];
+  const COLORS = ['#3b1679', '#5b21b6', '#7c3aed', '#a78bfa', '#c4b5fd', '#ede9fe'];
 
   return (
     <div className="p-6 space-y-6">
