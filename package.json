@@ -1,0 +1,16 @@
+{
+  "name": "transitops-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "install:all": "npm install && npm install --prefix server --legacy-peer-deps && npm install --prefix client --legacy-peer-deps",
+    "setup": "npm install --prefix server --legacy-peer-deps && npm install --prefix client --legacy-peer-deps",
+    "seed": "npm run seed --prefix server",
+    "prisma:push": "npx prisma db push --schema server/prisma/schema.prisma",
+    "prisma:generate": "npx prisma generate --schema server/prisma/schema.prisma"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

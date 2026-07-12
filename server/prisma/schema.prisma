@@ -1,0 +1,115 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id                  String    @id @default(cuid())
+  name                String
+  email               String    @unique
+  passwordHash        String
+  role                String // FleetManager, Dispatcher, SafetyOfficer, FinancialAnalyst
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  createdAt           DateTime  @default(now())
+}
+
+model Vehicle {
+  id                   String            @id @default(cuid())
+  registrationNumber   String            @unique
+  nameModel            String
+  type                 String
+  maxLoadCapacityKg    Float
+  odometer             Float             @default(0)
+  acquisitionCost      Float
+  status               String            @default("Available") // Available, OnTrip, InShop, Retired
+  createdAt            DateTime          @default(now())
+  trips                Trip[]
+  maintenanceRecords   MaintenanceRecord[]
+  fuelLogs             FuelLog[]
+  expenses             Expense[]
+}
+
+model Driver {
+  id                  String       @id @default(cuid())
+  name                String
+  licenseNumber       String       @unique
+  licenseCategory     String
+  licenseExpiryDate   DateTime
+  contactNumber       String
+  safetyScore         Float        @default(100)
+  status              String       @default("Available") // Available, OnTrip, OffDuty, Suspended
+  createdAt           DateTime     @default(now())
+  trips               Trip[]
+}
+
+model Trip {
+  id               String     @id @default(cuid())
+  tripCode         String     @unique
+  source           String
+  destination      String
+  vehicleId        String
+  driverId         String
+  cargoWeightKg    Float
+  plannedDistanceKm Float
+  status           String     @default("Draft") // Draft, Dispatched, Completed, Cancelled
+  eta              String?
+  notes            String?
+  createdAt        DateTime   @default(now())
+  dispatchedAt     DateTime?
+  completedAt      DateTime?
+  finalOdometer    Float?
+  fuelConsumed     Float?
+  vehicle          Vehicle    @relation(fields: [vehicleId], references: [id])
+  driver           Driver     @relation(fields: [driverId], references: [id])
+  expenses         Expense[]
+}
+
+model MaintenanceRecord {
+  id          String            @id @default(cuid())
+  vehicleId   String
+  serviceType String
+  cost        Float
+  date        DateTime
+  status      String            @default("Active") // Active, Completed
+  notes       String?
+  createdAt   DateTime          @default(now())
+  vehicle     Vehicle           @relation(fields: [vehicleId], references: [id])
+}
+
+model FuelLog {
+  id        String   @id @default(cuid())
+  vehicleId String
+  date      DateTime
+  liters    Float
+  cost      Float
+  createdAt DateTime @default(now())
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
+}
+
+model Expense {
+  id                     String  @id @default(cuid())
+  tripId                 String?
+  vehicleId              String
+  toll                   Float   @default(0)
+  other                  Float   @default(0)
+  maintenanceLinkedCost  Float   @default(0)
+  total                  Float
+  status                 String  @default("Pending")
+  createdAt              DateTime @default(now())
+  trip                   Trip?   @relation(fields: [tripId], references: [id])
+  vehicle                Vehicle @relation(fields: [vehicleId], references: [id])
+}
+
+model Settings {
+  id           String @id @default("singleton")
+  depotName    String @default("Main Depot")
+  currency     String @default("INR")
+  distanceUnit String @default("Kilometers")
+}
