@@ -37,6 +37,10 @@ export default {
           'green-light': 'rgb(var(--color-accent-green-light) / <alpha-value>)',
           red: 'rgb(var(--color-accent-red) / <alpha-value>)',
           'red-light': 'rgb(var(--color-accent-red-light) / <alpha-value>)',
+        },
+        brand: {
+          amber: 'rgb(var(--color-brand-amber) / <alpha-value>)',
+          'amber-light': 'rgb(var(--color-brand-amber-light) / <alpha-value>)',
         }
       },
       fontFamily: {

@@ -35,6 +35,10 @@ html {
 
   /* Logo hex fill — dark mode: bright violet */
   --logo-hex-fill: #9333ea;
+
+  /* Brand amber (fixed across light/dark mode) */
+  --color-brand-amber: 242 166 35;
+  --color-brand-amber-light: 245 186 81;
 }
 
 html.light {
@@ -72,6 +76,10 @@ html.light {
 
   /* Logo hex fill — light mode: deeper purple for contrast on white */
   --logo-hex-fill: #7e22ce;
+
+  /* Brand amber (fixed across light/dark mode) */
+  --color-brand-amber: 242 166 35;
+  --color-brand-amber-light: 245 186 81;
 }
 
 @tailwind base;
@@ -97,7 +105,7 @@ html.light {
     @apply bg-dark-700 rounded-2xl border border-dark-500 p-6 transition-all duration-300 hover:border-dark-400 hover:shadow-lg hover:shadow-neutral-950/15;
   }
   .btn-primary {
-    @apply bg-accent-amber hover:bg-accent-amber-light text-black font-bold px-4 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2 text-sm shadow-md hover:shadow-amber-500/20 active:scale-95;
+    @apply bg-brand-amber hover:bg-brand-amber-light text-black font-bold px-4 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2 text-sm shadow-md hover:shadow-brand-amber/20 active:scale-95;
   }
   .btn-secondary {
     @apply bg-dark-600 hover:bg-dark-500 text-gray-200 font-semibold px-4 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2 text-sm border border-dark-500 hover:border-dark-400 active:scale-95;

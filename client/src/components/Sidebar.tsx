@@ -39,7 +39,20 @@ export default function Sidebar() {
     <aside className="w-60 flex-shrink-0 bg-dark-900 border-r border-dark-500 flex flex-col h-screen sticky top-0">
       {/* Logo */}
       <div className="p-5 border-b border-dark-500/80 bg-gradient-to-b from-dark-900 to-transparent">
-        <TransitOpsLogo iconSize={36} showText={true} />
+        <div className="flex items-center gap-3">
+          <TransitOpsLogo iconSize={32} showText={false} />
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-extrabold text-sm tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-100 to-accent-amber">
+                TransitOps
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-amber animate-pulse shadow-[0_0_8px_#9333ea]" />
+            </div>
+            <div className="text-[8px] font-bold text-gray-500 tracking-widest uppercase mt-0.5">
+              Control Gateway
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Nav Items */}

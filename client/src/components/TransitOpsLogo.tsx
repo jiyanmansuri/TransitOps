@@ -26,7 +26,7 @@ export default function TransitOpsLogo({
   className = '',
 }: TransitOpsLogoProps) {
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
+    <div className={`flex items-center gap-3.5 ${className}`}>
       {/* ── Hexagon SVG icon ── */}
       <svg
         width={iconSize}
@@ -37,10 +37,10 @@ export default function TransitOpsLogo({
         aria-label="TransitOps logo"
         style={{ flexShrink: 0 }}
       >
-        {/* Pointy-top regular hexagon — fill driven by CSS variable */}
+        {/* Pointy-top regular hexagon — fill fixed at brand wine purple (#6B4D62) */}
         <polygon
           points="50,5 89,27.5 89,72.5 50,95 11,72.5 11,27.5"
-          style={{ fill: 'var(--logo-hex-fill, #9333ea)' }}
+          fill="#6B4D62"
         />
 
         {/* Upward trend-line mimicking the stock-chart in the uploaded logo */}
@@ -58,19 +58,16 @@ export default function TransitOpsLogo({
       </svg>
 
       {showText && (
-        <div>
+        <div className="flex flex-col justify-center text-left">
           {/* Brand name */}
-          <div className="flex items-center gap-1.5">
-            <span className="font-extrabold text-sm tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-gray-100 via-white to-accent-amber logo-brand-text">
-              TransitOps
-            </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-accent-amber animate-pulse shadow-[0_0_8px_#9333ea]" />
-          </div>
+          <span className="font-extrabold text-xl tracking-tight leading-none text-gray-900 dark:text-gray-50">
+            TransitOps
+          </span>
 
           {/* Subtitle */}
-          <div className="text-[8px] font-bold text-gray-500 tracking-widest uppercase mt-0.5">
-            smart transport ops
-          </div>
+          <span className="font-medium text-[10px] text-gray-500 dark:text-gray-400 mt-1.5 lowercase leading-none">
+            smart transport operations platform
+          </span>
         </div>
       )}
     </div>

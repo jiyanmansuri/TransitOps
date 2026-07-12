@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Activity, TrendingUp, DollarSign, BarChart2, Download, FileText } from 'lucide-react';
 import api from '../api/client';
 import KPICard from '../components/KPICard';
+import TransitOpsLogo from '../components/TransitOpsLogo';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell
 } from 'recharts';
@@ -48,6 +49,15 @@ export default function AnalyticsPage() {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Print-only Header with full brand logo lockup */}
+      <div className="hidden print:flex items-center justify-between border-b border-gray-300 dark:border-dark-500 pb-4 mb-6">
+        <TransitOpsLogo iconSize={40} showText={true} />
+        <div className="text-right">
+          <div className="text-sm font-bold text-gray-800 dark:text-gray-200">Operational Report</div>
+          <div className="text-[10px] text-gray-500 dark:text-gray-400">{new Date().toLocaleDateString()}</div>
+        </div>
+      </div>
+
       <div className="flex justify-between items-center">
         <div>
           <h1 className="page-title">Reports & Analytics</h1>
