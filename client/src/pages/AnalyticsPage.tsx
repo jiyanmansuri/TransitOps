@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { Activity, TrendingUp, DollarSign, BarChart2 } from 'lucide-react';
+import { Activity, TrendingUp, DollarSign, BarChart2, Download, FileText } from 'lucide-react';
 import api from '../api/client';
 import KPICard from '../components/KPICard';
 import {
@@ -11,6 +11,25 @@ export default function AnalyticsPage() {
     queryKey: ['analytics'],
     queryFn: () => api.get('/analytics').then(r => r.data),
   });
+
+  const exportCSV = () => {
+    if (!vehicleRoi || vehicleRoi.length === 0) return;
+    const headers = ['Vehicle', 'Total Cost (INR)', 'ROI %'];
+    const rows = vehicleRoi.map((v: any) => [`"${v.name}"`, v.totalCost, `"${v.roi}%"`]);
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + [headers.join(','), ...rows.map((r: any[]) => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "transitops_vehicle_roi_report.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportPDF = () => {
+    window.print();
+  };
 
   if (isLoading) {
     return (
@@ -29,9 +48,19 @@ export default function AnalyticsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h1 className="page-title">Reports & Analytics</h1>
-        <p className="text-gray-500 text-sm">Fleet performance overview</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="page-title">Reports & Analytics</h1>
+          <p className="text-gray-500 text-sm">Fleet performance overview</p>
+        </div>
+        <div className="flex gap-2.5 no-print">
+          <button onClick={exportCSV} className="btn-secondary py-2 text-xs flex items-center gap-1.5">
+            <Download size={14} /> Export CSV
+          </button>
+          <button onClick={exportPDF} className="btn-primary py-2 text-xs flex items-center gap-1.5 bg-accent-blue hover:bg-accent-blue-light text-white border-transparent">
+            <FileText size={14} /> Export PDF
+          </button>
+        </div>
       </div>
 
       {/* KPI Cards */}
