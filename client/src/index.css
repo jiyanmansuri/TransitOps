@@ -3,10 +3,41 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-canvas: #000000;
+  --bg-surface-elevated: #08080a;
+  --bg-surface-card: #0f0f12;
+  --bg-surface-row: #15151c;
+  --border-line: #1e1e26;
+  --border-focus: #2c2c38;
+  
+  --text-main: #f3f4f6;
+  --text-main-muted: #e5e7eb;
+  --text-muted: #9ca3af;
+  --text-sub: #6b7280;
+  --text-muted-dark: #4b5563;
+}
+
+html.light {
+  --bg-canvas: #f8fafc;
+  --bg-surface-elevated: #ffffff;
+  --bg-surface-card: #ffffff;
+  --bg-surface-row: #f1f5f9;
+  --border-line: #cbd5e1;
+  --border-focus: #94a3b8;
+  
+  --text-main: #0f172a;
+  --text-main-muted: #1e293b;
+  --text-muted: #475569;
+  --text-sub: #64748b;
+  --text-muted-dark: #94a3b8;
+}
+
 @layer base {
   * { box-sizing: border-box; }
   body {
-    @apply bg-dark-900 text-gray-100 font-sans;
+    background-color: var(--bg-canvas);
+    color: var(--text-main);
     font-size: 14px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

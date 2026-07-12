@@ -44,7 +44,7 @@ export default function Sidebar() {
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-sm tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-100 to-accent-amber">
+              <span className="font-extrabold text-sm tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-accent-amber">
                 TransitOps
               </span>
               <span className="w-1.5 h-1.5 rounded-full bg-accent-amber animate-pulse shadow-[0_0_6px_#f59e0b]" />
