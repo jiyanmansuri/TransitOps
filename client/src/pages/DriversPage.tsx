@@ -59,6 +59,16 @@ export default function DriversPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['drivers'] }),
   });
 
+  const remindMutation = useMutation({
+    mutationFn: () => api.post('/drivers/remind-expiry'),
+    onSuccess: (res: any) => {
+      alert(res.data.message);
+    },
+    onError: (err: any) => {
+      alert(err.response?.data?.error || 'Failed to send reminders');
+    }
+  });
+
   const isExpired = (dateStr: string) => new Date(dateStr) < new Date();
 
   return (
@@ -69,9 +79,18 @@ export default function DriversPage() {
           <p className="text-gray-500 text-sm">{drivers.length} registered drivers</p>
         </div>
         {canEdit && (
-          <button onClick={() => { setShowModal(true); setForm(emptyForm); setFormError(''); }} className="btn-primary">
-            <Plus size={16} /> Add Driver
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => remindMutation.mutate()}
+              disabled={remindMutation.isPending}
+              className="btn-secondary py-2 text-xs"
+            >
+              {remindMutation.isPending ? 'Sending...' : '✉ Send Expiry Reminders'}
+            </button>
+            <button onClick={() => { setShowModal(true); setForm(emptyForm); setFormError(''); }} className="btn-primary py-2 text-xs">
+              <Plus size={14} /> Add Driver
+            </button>
+          </div>
         )}
       </div>
 

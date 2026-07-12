@@ -91,4 +91,36 @@ router.delete('/:id', verifyToken, requireRole('FleetManager'), async (req, res)
   return res.json({ message: 'Vehicle deleted' });
 });
 
+// Vehicle Document Management Routes
+router.get('/:id/documents', verifyToken, async (req, res) => {
+  const docs = await prisma.vehicleDocument.findMany({
+    where: { vehicleId: req.params.id },
+    orderBy: { expiryDate: 'asc' }
+  });
+  return res.json(docs);
+});
+
+router.post('/:id/documents', verifyToken, requireRole('FleetManager'), async (req, res) => {
+  const { type, docNumber, expiryDate } = req.body;
+  if (!type || !docNumber || !expiryDate) {
+    return res.status(400).json({ error: 'Type, document number, and expiry date are required' });
+  }
+  const status = new Date(expiryDate) < new Date() ? 'Expired' : 'Active';
+  const doc = await prisma.vehicleDocument.create({
+    data: {
+      vehicleId: req.params.id,
+      type,
+      docNumber,
+      expiryDate: new Date(expiryDate),
+      status
+    }
+  });
+  return res.status(201).json(doc);
+});
+
+router.delete('/documents/:docId', verifyToken, requireRole('FleetManager'), async (req, res) => {
+  await prisma.vehicleDocument.delete({ where: { id: req.params.docId } });
+  return res.json({ message: 'Document deleted' });
+});
+
 export default router;

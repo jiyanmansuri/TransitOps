@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, Truck } from 'lucide-react';
+import { Plus, Pencil, Trash2, Truck, FileText, Trash } from 'lucide-react';
 import api from '../api/client';
 import StatusBadge from '../components/StatusBadge';
 import Modal from '../components/Modal';
@@ -15,6 +15,15 @@ interface Vehicle {
   maxLoadCapacityKg: number;
   odometer: number;
   acquisitionCost: number;
+  status: string;
+}
+
+interface VehicleDocument {
+  id: string;
+  vehicleId: string;
+  type: string;
+  docNumber: string;
+  expiryDate: string;
   status: string;
 }
 
@@ -35,6 +44,37 @@ export default function FleetPage() {
   const [editVehicle, setEditVehicle] = useState<Vehicle | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState('');
+
+  // Vehicle Document States
+  const [selectedDocVehicle, setSelectedDocVehicle] = useState<Vehicle | null>(null);
+  const [docForm, setDocForm] = useState({ type: 'Insurance', docNumber: '', expiryDate: '' });
+  const [docFormError, setDocFormError] = useState('');
+
+  // Documents Query
+  const { data: documents = [], refetch: refetchDocs } = useQuery<VehicleDocument[]>({
+    queryKey: ['vehicle-documents', selectedDocVehicle?.id],
+    queryFn: () => api.get(`/vehicles/${selectedDocVehicle?.id}/documents`).then(r => r.data),
+    enabled: !!selectedDocVehicle,
+  });
+
+  const addDocMutation = useMutation({
+    mutationFn: (data: typeof docForm) => api.post(`/vehicles/${selectedDocVehicle?.id}/documents`, data),
+    onSuccess: () => {
+      refetchDocs();
+      setDocForm({ type: 'Insurance', docNumber: '', expiryDate: '' });
+      setDocFormError('');
+    },
+    onError: (err: any) => {
+      setDocFormError(err.response?.data?.error || 'Failed to add document');
+    }
+  });
+
+  const deleteDocMutation = useMutation({
+    mutationFn: (docId: string) => api.delete(`/vehicles/documents/${docId}`),
+    onSuccess: () => {
+      refetchDocs();
+    }
+  });
 
   const { data: vehicles = [], isLoading } = useQuery<Vehicle[]>({
     queryKey: ['vehicles', typeFilter, statusFilter, search],
@@ -129,14 +169,15 @@ export default function FleetPage() {
                 <th className="table-header">Odometer (km)</th>
                 <th className="table-header">Acq. Cost (₹)</th>
                 <th className="table-header">Status</th>
+                <th className="table-header">Documents</th>
                 {canEdit && <th className="table-header">Actions</th>}
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={8} className="table-cell text-center text-gray-500 py-12">Loading...</td></tr>
+                <tr><td colSpan={9} className="table-cell text-center text-gray-500 py-12">Loading...</td></tr>
               ) : vehicles.length === 0 ? (
-                <tr><td colSpan={8} className="table-cell text-center text-gray-500 py-12">
+                <tr><td colSpan={9} className="table-cell text-center text-gray-500 py-12">
                   <Truck size={32} className="mx-auto mb-3 opacity-30" />
                   No vehicles found
                 </td></tr>
@@ -149,6 +190,14 @@ export default function FleetPage() {
                   <td className="table-cell tabular-nums">{v.odometer.toLocaleString()}</td>
                   <td className="table-cell tabular-nums">₹{v.acquisitionCost.toLocaleString()}</td>
                   <td className="table-cell"><StatusBadge status={v.status} size="sm" /></td>
+                  <td className="table-cell">
+                    <button
+                      onClick={() => setSelectedDocVehicle(v)}
+                      className="btn-secondary py-1 px-2.5 text-xs flex items-center gap-1.5 border border-dark-500 hover:border-accent-amber/40"
+                    >
+                      <FileText size={12} /> Docs
+                    </button>
+                  </td>
                   {canEdit && (
                     <td className="table-cell">
                       <div className="flex gap-2">
@@ -208,6 +257,133 @@ export default function FleetPage() {
               </button>
             </div>
           </form>
+        </Modal>
+      )}
+
+      {/* Vehicle Documents Modal */}
+      {selectedDocVehicle && (
+        <Modal
+          title={`Documents: ${selectedDocVehicle.registrationNumber}`}
+          onClose={() => setSelectedDocVehicle(null)}
+          size="lg"
+        >
+          <div className="space-y-6">
+            {/* Document Listing Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-dark-500">
+                    <th className="table-header py-2 text-xs">Doc Type</th>
+                    <th className="table-header py-2 text-xs">Doc Number</th>
+                    <th className="table-header py-2 text-xs">Expiry Date</th>
+                    <th className="table-header py-2 text-xs">Status</th>
+                    {canEdit && <th className="table-header py-2 text-xs">Action</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {documents.length === 0 ? (
+                    <tr>
+                      <td colSpan={canEdit ? 5 : 4} className="table-cell text-center text-gray-500 py-6 text-xs">
+                        No documents logged for this asset.
+                      </td>
+                    </tr>
+                  ) : (
+                    documents.map(doc => {
+                      const isExpired = new Date(doc.expiryDate) < new Date();
+                      return (
+                        <tr key={doc.id} className="table-row">
+                          <td className="table-cell py-2 text-xs font-semibold">{doc.type}</td>
+                          <td className="table-cell py-2 text-xs font-mono text-gray-400">{doc.docNumber}</td>
+                          <td className={`table-cell py-2 text-xs ${isExpired ? 'text-red-400' : 'text-gray-300'}`}>
+                            {new Date(doc.expiryDate).toLocaleDateString('en-IN')}
+                          </td>
+                          <td className="table-cell py-2 text-xs">
+                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${isExpired ? 'bg-red-500/20 text-red-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                              {isExpired ? 'Expired' : 'Active'}
+                            </span>
+                          </td>
+                          {canEdit && (
+                            <td className="table-cell py-2 text-xs">
+                              <button
+                                onClick={() => {
+                                  if (confirm('Delete this document?')) {
+                                    deleteDocMutation.mutate(doc.id);
+                                  }
+                                }}
+                                className="text-gray-500 hover:text-red-400 p-1 rounded hover:bg-red-500/10 transition-colors"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Add Document Section (Only for FleetManager) */}
+            {canEdit && (
+              <div className="pt-4 border-t border-dark-500 space-y-3">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Log New Document</h3>
+                <form
+                  onSubmit={e => {
+                    e.preventDefault();
+                    addDocMutation.mutate(docForm);
+                  }}
+                  className="grid grid-cols-3 gap-3 items-end"
+                >
+                  <div>
+                    <label className="label text-[10px]">Doc Type</label>
+                    <select
+                      className="select py-2 text-xs"
+                      value={docForm.type}
+                      onChange={e => setDocForm(f => ({ ...f, type: e.target.value }))}
+                    >
+                      <option value="Insurance">Insurance</option>
+                      <option value="Permit">Permit</option>
+                      <option value="Pollution">Pollution Certificate</option>
+                      <option value="Registration">Registration Card</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="label text-[10px]">Document Number</label>
+                    <input
+                      type="text"
+                      className="input py-2 text-xs"
+                      placeholder="POL-12345"
+                      value={docForm.docNumber}
+                      onChange={e => setDocForm(f => ({ ...f, docNumber: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="label text-[10px]">Expiry Date</label>
+                    <input
+                      type="date"
+                      className="input py-2 text-xs"
+                      value={docForm.expiryDate}
+                      onChange={e => setDocForm(f => ({ ...f, expiryDate: e.target.value }))}
+                      required
+                    />
+                  </div>
+                  <div className="col-span-3 flex justify-between items-center pt-2">
+                    {docFormError && <span className="text-xs text-red-400">{docFormError}</span>}
+                    <div />
+                    <button
+                      type="submit"
+                      disabled={addDocMutation.isPending}
+                      className="btn-primary py-1.5 px-3 text-xs"
+                    >
+                      {addDocMutation.isPending ? 'Logging...' : '+ Log Document'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+          </div>
         </Modal>
       )}
     </div>

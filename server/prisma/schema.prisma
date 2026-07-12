@@ -34,6 +34,7 @@ model Vehicle {
   maintenanceRecords   MaintenanceRecord[]
   fuelLogs             FuelLog[]
   expenses             Expense[]
+  documents            VehicleDocument[]
 }
 
 model Driver {
@@ -112,4 +113,15 @@ model Settings {
   depotName    String @default("Main Depot")
   currency     String @default("INR")
   distanceUnit String @default("Kilometers")
+}
+
+model VehicleDocument {
+  id         String   @id @default(cuid())
+  vehicleId  String
+  type       String   // Insurance, Permit, Pollution, Registration
+  docNumber  String
+  expiryDate DateTime
+  status     String   @default("Active") // Active, Expired
+  createdAt  DateTime @default(now())
+  vehicle    Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
 }

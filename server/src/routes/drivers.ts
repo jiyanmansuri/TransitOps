@@ -97,4 +97,31 @@ router.delete('/:id', verifyToken, requireRole('FleetManager'), async (req, res)
   return res.json({ message: 'Driver deleted' });
 });
 
+// Email Expiry Reminder Route
+router.post('/remind-expiry', verifyToken, requireRole('FleetManager', 'SafetyOfficer'), async (req, res) => {
+  const drivers = await prisma.driver.findMany();
+  const today = new Date();
+  
+  const expiringDrivers = drivers.filter(d => {
+    const expiry = new Date(d.licenseExpiryDate);
+    const timeDiff = expiry.getTime() - today.getTime();
+    const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    return daysDiff <= 30;
+  });
+
+  if (expiringDrivers.length === 0) {
+    return res.json({ message: 'No expiring licenses found. No emails required.', count: 0, sentTo: [] });
+  }
+
+  expiringDrivers.forEach(d => {
+    console.log(`[EMAIL SIMULATOR] ✉ Sending license expiry warning to ${d.name} (Contact: ${d.contactNumber}) for license: ${d.licenseNumber} (Expiry: ${d.licenseExpiryDate})`);
+  });
+
+  return res.json({
+    message: `Warning notifications sent successfully to ${expiringDrivers.length} driver(s).`,
+    count: expiringDrivers.length,
+    sentTo: expiringDrivers.map(d => d.name)
+  });
+});
+
 export default router;
