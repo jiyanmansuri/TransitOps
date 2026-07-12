@@ -306,7 +306,7 @@ export default function TopBar() {
             {user?.role}
           </div>
         </div>
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-amber to-orange-600 flex items-center justify-center text-white font-bold text-sm shadow-lg">
+        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent-amber to-purple-800 flex items-center justify-center text-white font-bold text-sm shadow-lg">
           {user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
         </div>
       </div>

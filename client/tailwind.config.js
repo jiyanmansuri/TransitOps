@@ -4,6 +4,20 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Override Tailwind's amber palette → Odoo purple shades
+        amber: {
+          50:  '#f2f0f9',
+          100: '#e6e1f3',
+          200: '#cfc5e7',
+          300: '#b1a1d7',
+          400: '#8f7fc2', // light Odoo purple
+          500: '#71639e', // Odoo primary purple
+          600: '#5a4d87',
+          700: '#483d6d',
+          800: '#383056',
+          900: '#2b2643',
+          950: '#1b172a',
+        },
         dark: {
           900: '#000000', // Absolute pure black canvas
           800: '#08080a', // Deep zinc black (Sidebar/TopBar)
@@ -13,13 +27,13 @@ export default {
           400: '#2c2c38', // Focus borders
         },
         accent: {
-          amber: '#f59e0b', // Vibrant amber
-          'amber-light': '#fbbf24',
-          blue: '#3b82f6', // Neon blue
+          amber: '#71639e',       // Odoo primary purple
+          'amber-light': '#8f7fc2', // Odoo light purple
+          blue: '#3b82f6',
           'blue-light': '#60a5fa',
-          green: '#10b981', // Emerald green
+          green: '#10b981',
           'green-light': '#34d399',
-          red: '#ef4444', // High-contrast red
+          red: '#ef4444',
           'red-light': '#f87171',
         }
       },
@@ -27,7 +41,7 @@ export default {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
       boxShadow: {
-        'glow-amber': '0 0 15px rgba(245, 158, 11, 0.15)',
+        'glow-amber': '0 0 15px rgba(113, 99, 158, 0.15)', // Odoo purple glow
         'glow-blue': '0 0 15px rgba(59, 130, 246, 0.15)',
         'glow-green': '0 0 15px rgba(16, 185, 129, 0.15)',
       }

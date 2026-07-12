@@ -40,14 +40,14 @@ export default function Sidebar() {
       <div className="p-5 border-b border-dark-500/80 bg-gradient-to-b from-black to-transparent">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-dark-700 to-dark-800 border border-dark-500 flex items-center justify-center shadow-lg shadow-black/80 hover:border-accent-amber/40 transition-all duration-500 group cursor-pointer">
-            <Compass size={16} className="text-accent-amber drop-shadow-[0_0_6px_rgba(245,158,11,0.6)] group-hover:rotate-45 transition-transform duration-500" />
+            <Compass size={16} className="text-accent-amber drop-shadow-[0_0_6px_rgba(113,99,158,0.6)] group-hover:rotate-45 transition-transform duration-500" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
               <span className="font-extrabold text-sm tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-100 to-accent-amber">
                 TransitOps
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-amber animate-pulse shadow-[0_0_6px_#f59e0b]" />
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-amber animate-pulse shadow-[0_0_6px_#71639e]" />
             </div>
             <div className="text-[8px] font-bold text-gray-500 tracking-widest uppercase mt-0.5">
               Control Gateway
