@@ -1,6 +1,10 @@
 <div align="center">
 
-<img width="247" height="87" alt="TransitOps Logo" src="client/src/components/Logo.tsx" />
+<svg viewBox="0 0 100 100" width="96" height="96" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="50,5 93,30 93,70 50,95 7,70 7,30" fill="#6B4D62" />
+  <path d="M22,60 L42,42 L62,56 L76,34" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="76" cy="34" r="7" fill="#FFFFFF" />
+</svg>
 
 # TransitOps
 
@@ -33,9 +37,8 @@ TransitOps is a comprehensive **Fleet Management & Intelligent Logistics** platf
 
 - [Core Objectives](#-core-objectives)
 - [Tech Stack](#-tech-stack)
-- [Roles & Permissions](#-roles--permissions)
+- [Role-Based Access Control (RBAC) Matrix](#-role-based-access-control-rbac-matrix)
 - [Core Modules](#-core-modules)
-- [System Features](#-system-features)
 - [Folder Structure](#-folder-structure)
 - [Setup Guide](#-setup-guide)
 - [Demo Credentials](#-demo-credentials)
@@ -87,21 +90,16 @@ TransitOps is a comprehensive **Fleet Management & Intelligent Logistics** platf
 
 ---
 
-##  Roles & Permissions
+## 🔒 Role-Based Access Control (RBAC) Matrix
 
-```
-┌─────────────────────┬────────────────────────────────────────────────────────┐
-│ Role                │ Capabilities                                           │
-├─────────────────────┼────────────────────────────────────────────────────────┤
-│ Fleet Manager       │ Full Access · Manage vehicles, drivers, rules, configs │
-├─────────────────────┼────────────────────────────────────────────────────────┤
-│ Dispatcher          │ Plan trips · Assign eligible drivers & trucks          │
-├─────────────────────┼────────────────────────────────────────────────────────┤
-│ Safety Officer      │ Monitor safety scores · Expired licenses · Reminders  │
-├─────────────────────┼────────────────────────────────────────────────────────┤
-│ Financial Analyst   │ Cost auditing · Fuel logs · Analytics & ROI reports    │
-└─────────────────────┴────────────────────────────────────────────────────────┘
-```
+TransitOps enforces route guarding on both the UI navigation and API endpoints according to the following permissions:
+
+| Access Role | Fleet Module | Drivers Module | Trips Module | Fuel/Exp Module | Analytics Module |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Fleet Manager** | ✓ Edit | ✓ Edit | — | — | ✓ Edit |
+| **Dispatcher** | view | — | ✓ Edit | — | — |
+| **Safety Officer** | — | ✓ Edit | view | — | — |
+| **Financial Analyst** | view | — | — | ✓ Edit | ✓ Edit |
 
 ---
 
@@ -198,9 +196,9 @@ git clone https://github.com/jiyanmansuri/TransitOps.git
 cd TransitOps
 ```
 
-### 2 · Install root and workspace dependencies
+### 2 · Install dependencies
 
-Run the setup from the root folder:
+Run setup from the root folder:
 
 ```bash
 npm install
@@ -225,13 +223,14 @@ npm run seed
 
 ### 5 · Launch the development server
 
-From the root directory, launch the concurrently run script:
+From the root directory, launch the development script:
 
 ```bash
 npm run dev
 ```
 
-> The application client runs locally at `http://localhost:5173` (or subsequent fallback port) and connects to the backend API server running at `http://localhost:3001`.
+*   **Frontend Dashboard Console:** `http://localhost:5173` (or subsequent fallback port)
+*   **Backend REST Gateway:** `http://localhost:3001`
 
 ---
 
@@ -239,12 +238,10 @@ npm run dev
 
 All seeded accounts share the password: `demo1234`.
 
-| Role | Username |
-|------|----------|
-| Fleet Manager | `fleet@demo.com` |
-| Dispatcher | `dispatch@demo.com` |
-| Safety Officer | `safety@demo.com` |
-| Financial Analyst | `finance@demo.com` |
+*   💼 **Fleet Manager**: `fleet@demo.com`
+*   🚚 **Dispatcher**: `dispatch@demo.com`
+*   🛡️ **Safety Officer**: `safety@demo.com`
+*   📊 **Financial Analyst**: `finance@demo.com`
 
 ---
 
