@@ -37,14 +37,21 @@ export default function Sidebar() {
   return (
     <aside className="w-60 flex-shrink-0 bg-dark-900 border-r border-dark-500 flex flex-col h-screen sticky top-0">
       {/* Logo */}
-      <div className="p-5 border-b border-dark-500">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-accent-amber flex items-center justify-center">
-            <Zap size={16} className="text-white" />
+      <div className="p-5 border-b border-dark-500/80 bg-gradient-to-b from-black to-transparent">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-dark-700 to-dark-800 border border-dark-500 flex items-center justify-center shadow-lg shadow-black/80 hover:border-accent-amber/40 transition-all duration-500 group cursor-pointer">
+            <Zap size={16} className="text-accent-amber drop-shadow-[0_0_6px_rgba(245,158,11,0.6)] group-hover:scale-110 transition-transform duration-300" />
           </div>
           <div>
-            <div className="font-bold text-white text-sm tracking-wide">TransitOps</div>
-            <div className="text-gray-500 text-[10px]">Smart Transport Platform</div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-extrabold text-sm tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-100 to-accent-amber">
+                TransitOps
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-amber animate-pulse shadow-[0_0_6px_#f59e0b]" />
+            </div>
+            <div className="text-[8px] font-bold text-gray-500 tracking-widest uppercase mt-0.5">
+              Control Gateway
+            </div>
           </div>
         </div>
       </div>
