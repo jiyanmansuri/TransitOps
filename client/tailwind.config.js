@@ -4,48 +4,52 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Override Tailwind's amber palette → vivid electric violet shades
-        amber: {
-          50:  '#f5f3ff',
-          100: '#ede9fe',
-          200: '#ddd6fe',
-          300: '#c4b5fd',
-          400: '#a78bfa', // vivid violet light
-          500: '#7c3aed', // electric violet primary
-          600: '#6d28d9',
-          700: '#5b21b6',
-          800: '#4c1d95',
-          900: '#3b1679',
-          950: '#2e1065',
-        },
+        // Redefine colors to use CSS variables for theme support
         dark: {
-          900: '#000000', // Absolute pure black canvas
-          800: '#08080a', // Deep zinc black (Sidebar/TopBar)
-          700: '#0f0f12', // Elevated dark (Cards)
-          600: '#15151c', // Inputs & table rows
-          500: '#1e1e26', // Border line
-          400: '#2c2c38', // Focus borders
+          900: 'rgb(var(--color-dark-900) / <alpha-value>)',
+          800: 'rgb(var(--color-dark-800) / <alpha-value>)',
+          700: 'rgb(var(--color-dark-700) / <alpha-value>)',
+          600: 'rgb(var(--color-dark-600) / <alpha-value>)',
+          500: 'rgb(var(--color-dark-500) / <alpha-value>)',
+          400: 'rgb(var(--color-dark-400) / <alpha-value>)',
         },
+        gray: {
+          50:  'rgb(var(--color-gray-50) / <alpha-value>)',
+          100: 'rgb(var(--color-gray-100) / <alpha-value>)',
+          200: 'rgb(var(--color-gray-200) / <alpha-value>)',
+          300: 'rgb(var(--color-gray-300) / <alpha-value>)',
+          400: 'rgb(var(--color-gray-400) / <alpha-value>)',
+          500: 'rgb(var(--color-gray-500) / <alpha-value>)',
+          600: 'rgb(var(--color-gray-600) / <alpha-value>)',
+          700: 'rgb(var(--color-gray-700) / <alpha-value>)',
+          800: 'rgb(var(--color-gray-800) / <alpha-value>)',
+          900: 'rgb(var(--color-gray-900) / <alpha-value>)',
+        },
+        white: 'rgb(var(--color-white) / <alpha-value>)',
+        black: 'rgb(var(--color-black) / <alpha-value>)',
+        
         accent: {
-          amber: '#7c3aed',       // Electric violet primary
-          'amber-light': '#a78bfa', // Vivid violet light
-          blue: '#3b82f6',
-          'blue-light': '#60a5fa',
-          green: '#10b981',
-          'green-light': '#34d399',
-          red: '#ef4444',
-          'red-light': '#f87171',
+          amber: 'rgb(var(--color-accent-amber) / <alpha-value>)',
+          'amber-light': 'rgb(var(--color-accent-amber-light) / <alpha-value>)',
+          blue: 'rgb(var(--color-accent-blue) / <alpha-value>)',
+          'blue-light': 'rgb(var(--color-accent-blue-light) / <alpha-value>)',
+          green: 'rgb(var(--color-accent-green) / <alpha-value>)',
+          'green-light': 'rgb(var(--color-accent-green-light) / <alpha-value>)',
+          red: 'rgb(var(--color-accent-red) / <alpha-value>)',
+          'red-light': 'rgb(var(--color-accent-red-light) / <alpha-value>)',
         }
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
       boxShadow: {
-        'glow-amber': '0 0 20px rgba(124, 58, 237, 0.25)', // electric violet glow
-        'glow-blue': '0 0 15px rgba(59, 130, 246, 0.15)',
-        'glow-green': '0 0 15px rgba(16, 185, 129, 0.15)',
+        'glow-amber': '0 0 20px rgba(var(--color-accent-amber), 0.30)', // lighter violet glow
+        'glow-blue': '0 0 15px rgba(var(--color-accent-blue), 0.15)',
+        'glow-green': '0 0 15px rgba(var(--color-accent-green), 0.15)',
       }
     },
   },
   plugins: [],
 }
+
+

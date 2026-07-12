@@ -1,8 +1,8 @@
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { getDefaultRoute } from '../hooks/useRBAC';
-import { Zap, Eye, EyeOff, Lock, Mail, Shield } from 'lucide-react';
+import { Compass, Eye, EyeOff, Lock, Mail, Shield, Sun, Moon } from 'lucide-react';
 
 const roles = ['FleetManager', 'Dispatcher', 'SafetyOfficer', 'FinancialAnalyst'];
 const roleLabels: Record<string, string> = {
@@ -31,6 +31,20 @@ export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const [isLight, setIsLight] = useState(() => {
+    return localStorage.getItem('theme') === 'light' || document.documentElement.classList.contains('light');
+  });
+
+  useEffect(() => {
+    if (isLight) {
+      document.documentElement.classList.add('light');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.classList.remove('light');
+      localStorage.setItem('theme', 'dark');
+    }
+  }, [isLight]);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
@@ -47,7 +61,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-dark-900 flex">
+    <div className="min-h-screen bg-dark-900 flex relative">
+      {/* Theme Toggle Button */}
+      <button
+        type="button"
+        onClick={() => setIsLight(!isLight)}
+        className="fixed top-4 right-4 p-2.5 rounded-xl bg-dark-700 border border-dark-500 text-gray-400 hover:text-white transition-all shadow-lg hover:shadow-neutral-950/15 active:scale-95 z-50"
+        title="Toggle Theme"
+      >
+        {isLight ? <Moon size={16} /> : <Sun size={16} />}
+      </button>
+
       {/* Left branding panel */}
       <div className="hidden lg:flex w-[45%] bg-gradient-to-br from-dark-800 via-dark-700 to-dark-800 flex-col justify-between p-12 border-r border-dark-500 relative overflow-hidden">
         {/* Background accent */}
@@ -56,10 +80,20 @@ export default function LoginPage() {
 
         <div className="relative">
           <div className="flex items-center gap-3 mb-12">
-            <div className="w-10 h-10 rounded-xl bg-accent-amber flex items-center justify-center shadow-lg shadow-amber-500/20">
-              <Zap size={20} className="text-white" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-dark-700 to-dark-800 border border-dark-500 flex items-center justify-center shadow-lg shadow-neutral-950/40 hover:border-accent-amber/40 transition-all duration-500 group cursor-pointer">
+              <Compass size={18} className="text-accent-amber drop-shadow-[0_0_6px_rgba(147,51,234,0.7)] group-hover:rotate-45 transition-transform duration-500" />
             </div>
-            <span className="text-white font-bold text-xl tracking-tight">TransitOps</span>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-sm tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-100 to-accent-amber">
+                  TransitOps
+                </span>
+                <span className="w-1.5 h-1.5 rounded-full bg-accent-amber animate-pulse shadow-[0_0_8px_#9333ea]" />
+              </div>
+              <div className="text-[8px] font-bold text-gray-500 tracking-widest uppercase mt-0.5">
+                Control Gateway
+              </div>
+            </div>
           </div>
 
           <h1 className="text-4xl font-bold text-white leading-snug mb-4">
@@ -102,10 +136,20 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="flex items-center gap-2.5 mb-8 lg:hidden">
-            <div className="w-8 h-8 rounded-lg bg-accent-amber flex items-center justify-center">
-              <Zap size={16} className="text-white" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-dark-700 to-dark-800 border border-dark-500 flex items-center justify-center shadow-lg shadow-neutral-950/40 hover:border-accent-amber/40 transition-all duration-500 group cursor-pointer">
+              <Compass size={16} className="text-accent-amber drop-shadow-[0_0_6px_rgba(147,51,234,0.7)] group-hover:rotate-45 transition-transform duration-500" />
             </div>
-            <span className="text-white font-bold text-lg">TransitOps</span>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-sm tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-100 to-accent-amber">
+                  TransitOps
+                </span>
+                <span className="w-1.5 h-1.5 rounded-full bg-accent-amber animate-pulse shadow-[0_0_8px_#9333ea]" />
+              </div>
+              <div className="text-[8px] font-bold text-gray-500 tracking-widest uppercase mt-0.5">
+                Control Gateway
+              </div>
+            </div>
           </div>
 
           <div className="mb-8">

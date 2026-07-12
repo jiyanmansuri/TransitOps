@@ -5,6 +5,7 @@ import { Plus, AlertTriangle, CheckCircle, XCircle, ArrowRight, Navigation } fro
 import api from '../api/client';
 import StatusBadge from '../components/StatusBadge';
 import Modal from '../components/Modal';
+import SmartDispatchPanel from '../components/SmartDispatchPanel';
 import { useAuth } from '../hooks/useAuth';
 import { canAccess } from '../hooks/useRBAC';
 
@@ -302,6 +303,17 @@ export default function TripsPage() {
       {showCreate && (
         <Modal title="Create Trip" onClose={closeCreateModal} size="lg">
           <form onSubmit={e => { e.preventDefault(); createMutation.mutate(form); }} className="space-y-4">
+            {/* Smart Dispatch Assistant */}
+            <SmartDispatchPanel
+              cargoWeightKg={form.cargoWeightKg}
+              currentVehicleId={form.vehicleId}
+              currentDriverId={form.driverId}
+              onAccept={(vehicleId, driverId) => {
+                setForm(f => ({ ...f, vehicleId, driverId }));
+                checkCapacity(vehicleId, form.cargoWeightKg);
+              }}
+            />
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="label">Source *</label>

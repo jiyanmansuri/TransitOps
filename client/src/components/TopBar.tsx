@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, AlertTriangle, ShieldAlert, Wrench, Navigation, CheckCircle, Truck, User, MapPin } from 'lucide-react';
+import { Search, Bell, AlertTriangle, ShieldAlert, Wrench, Navigation, CheckCircle, Truck, User, MapPin, Sun, Moon } from 'lucide-react';
 import api from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 
@@ -43,6 +43,20 @@ export default function TopBar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
+
+  const [isLight, setIsLight] = useState(() => {
+    return localStorage.getItem('theme') === 'light' || document.documentElement.classList.contains('light');
+  });
+
+  useEffect(() => {
+    if (isLight) {
+      document.documentElement.classList.add('light');
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.classList.remove('light');
+      localStorage.setItem('theme', 'dark');
+    }
+  }, [isLight]);
   
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -245,6 +259,15 @@ export default function TopBar() {
       </div>
 
       <div className="flex-1" />
+
+      {/* Theme Toggle Button */}
+      <button
+        onClick={() => setIsLight(!isLight)}
+        className="p-2 rounded-lg text-gray-400 hover:text-gray-100 hover:bg-dark-600 transition-colors"
+        title="Toggle Theme"
+      >
+        {isLight ? <Moon size={17} /> : <Sun size={17} />}
+      </button>
 
       {/* Notification Bell Dropdown */}
       <div className="relative" ref={dropdownRef}>

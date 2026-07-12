@@ -1,4 +1,73 @@
+/* TransitOps Design System — Electric Violet Theme */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+html {
+  /* Dark mode color values (Default) */
+  --color-dark-900: 0 0 0;       /* #000000 */
+  --color-dark-800: 8 8 10;      /* #08080a */
+  --color-dark-700: 15 15 18;    /* #0f0f12 */
+  --color-dark-600: 21 21 28;    /* #15151c */
+  --color-dark-500: 30 30 38;    /* #1e1e26 */
+  --color-dark-400: 44 44 56;    /* #2c2c38 */
+
+  --color-gray-50: 249 250 251;
+  --color-gray-100: 243 244 246;
+  --color-gray-200: 229 231 235;
+  --color-gray-300: 209 213 219;
+  --color-gray-400: 156 163 175;
+  --color-gray-500: 107 114 128;
+  --color-gray-600: 75 85 99;
+  --color-gray-700: 55 65 81;
+  --color-gray-800: 31 41 55;
+  --color-gray-900: 17 24 39;
+
+  --color-white: 255 255 255;
+  --color-black: 0 0 0;
+
+  --color-accent-amber: 147 51 234;       /* #9333ea */
+  --color-accent-amber-light: 192 132 252; /* #c084fc */
+  --color-accent-blue: 59 130 246;        /* #3b82f6 */
+  --color-accent-blue-light: 96 165 250;
+  --color-accent-green: 16 185 129;
+  --color-accent-green-light: 52 211 153;
+  --color-accent-red: 239 68 68;
+  --color-accent-red-light: 248 113 113;
+}
+
+html.light {
+  /* Light mode color values (Inverted) */
+  --color-dark-900: 255 255 255;    /* pure white bg */
+  --color-dark-800: 243 244 246;    /* light gray sidebar */
+  --color-dark-700: 249 250 251;    /* card bg */
+  --color-dark-600: 243 244 246;    /* input / row bg */
+  --color-dark-500: 229 231 235;    /* light border */
+  --color-dark-400: 209 213 219;    /* darker border */
+
+  --color-gray-50: 17 24 39;        /* very dark text */
+  --color-gray-100: 31 41 55;       /* dark gray text */
+  --color-gray-200: 55 65 81;
+  --color-gray-300: 75 85 99;
+  --color-gray-400: 107 114 128;
+  --color-gray-500: 156 163 175;
+  --color-gray-600: 209 213 219;
+  --color-gray-700: 229 231 235;
+  --color-gray-800: 243 244 246;
+  --color-gray-900: 249 250 251;
+
+  --color-white: 17 24 39;          /* white text -> dark text */
+  --color-black: 255 255 255;       /* black bg/logo -> white */
+
+  /* Higher contrast accents for light background */
+  --color-accent-amber: 126 34 206;       /* purple-700 */
+  --color-accent-amber-light: 147 51 234; /* purple-600 */
+  --color-accent-blue: 29 78 216;        /* blue-700 */
+  --color-accent-blue-light: 37 99 235;
+  --color-accent-green: 4 120 87;
+  --color-accent-green-light: 5 150 105;
+  --color-accent-red: 185 28 28;
+  --color-accent-red-light: 220 38 38;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -19,7 +88,7 @@
 
 @layer components {
   .card {
-    @apply bg-dark-700 rounded-2xl border border-dark-500 p-6 transition-all duration-300 hover:border-dark-400 hover:shadow-lg hover:shadow-black/40;
+    @apply bg-dark-700 rounded-2xl border border-dark-500 p-6 transition-all duration-300 hover:border-dark-400 hover:shadow-lg hover:shadow-neutral-950/15;
   }
   .btn-primary {
     @apply bg-accent-amber hover:bg-accent-amber-light text-black font-bold px-4 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2 text-sm shadow-md hover:shadow-amber-500/20 active:scale-95;

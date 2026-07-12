@@ -46,7 +46,7 @@ interface Driver {
 const STATUS_COLORS = {
   Available: '#10b981',
   OnTrip: '#3b82f6',
-  InShop: '#7c3aed',
+  InShop: '#9333ea',
   Retired: '#ef4444',
 };
 
@@ -267,9 +267,13 @@ export default function DashboardPage() {
               <XAxis type="number" tick={{ fill: '#9ca3af', fontSize: 10 }} axisLine={false} tickLine={false} />
               <YAxis dataKey="name" type="category" tick={{ fill: '#9ca3af', fontSize: 10 }} axisLine={false} tickLine={false} width={70} />
               <Tooltip
-                contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: 8 }}
-                labelStyle={{ color: '#fff' }}
-                itemStyle={{ color: '#d1d5db' }}
+                contentStyle={{
+                  background: 'rgb(var(--color-dark-700))',
+                  border: '1px solid rgb(var(--color-dark-500))',
+                  borderRadius: 8,
+                }}
+                labelStyle={{ color: 'rgb(var(--color-gray-100))' }}
+                itemStyle={{ color: 'rgb(var(--color-gray-200))' }}
               />
               <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={24}>
                 {statusBarData.map((entry) => (
@@ -302,7 +306,13 @@ export default function DashboardPage() {
               <XAxis dataKey="month" tick={{ fill: '#9ca3af', fontSize: 10 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: '#9ca3af', fontSize: 10 }} axisLine={false} tickLine={false} />
               <Tooltip
-                contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: 8 }}
+                contentStyle={{
+                  background: 'rgb(var(--color-dark-700))',
+                  border: '1px solid rgb(var(--color-dark-500))',
+                  borderRadius: 8,
+                }}
+                labelStyle={{ color: 'rgb(var(--color-gray-400))' }}
+                itemStyle={{ color: 'rgb(var(--color-gray-100))' }}
                 formatter={(v: number) => [`₹${v.toLocaleString()}`, 'Revenue']}
               />
               <Bar dataKey="revenue" fill="#d97706" radius={[4, 4, 0, 0]} maxBarSize={48} />

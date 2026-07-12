@@ -14,7 +14,7 @@ export default function Modal({ title, onClose, children, size = 'md' }: ModalPr
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-0 bg-neutral-950/70 backdrop-blur-sm" onClick={onClose} />
       {/* Panel */}
       <div className={`relative bg-dark-700 rounded-xl border border-dark-400 shadow-2xl w-full ${sizeClass} max-h-[90vh] flex flex-col`}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-dark-500">

@@ -27,6 +27,132 @@ router.get('/', verifyToken, async (req, res) => {
   return res.json(trips);
 });
 
+// ── Smart Dispatch Assistant ─────────────────────────────────────────────────
+// GET /trips/recommend?cargoWeightKg=500
+// Returns the best available vehicle and driver via a weighted scoring algorithm.
+router.get('/recommend', verifyToken, async (req, res) => {
+  const cargoWeightKg = parseFloat(req.query.cargoWeightKg as string) || 0;
+  const today = new Date();
+
+  // ── Fetch all available vehicles with fuel history ──────────────────────────
+  const vehicles = await prisma.vehicle.findMany({
+    where: { status: 'Available' },
+    include: {
+      fuelLogs: { orderBy: { date: 'desc' }, take: 10 },
+      trips: { where: { status: 'Completed' }, select: { plannedDistanceKm: true, fuelConsumed: true } }
+    }
+  });
+
+  // ── Fetch all eligible drivers with recent trip load ─────────────────────────
+  const drivers = await prisma.driver.findMany({
+    where: { status: 'Available', licenseExpiryDate: { gt: today } },
+    include: {
+      trips: {
+        where: { status: { in: ['Draft', 'Dispatched'] } },
+        select: { id: true }
+      }
+    }
+  });
+
+  if (vehicles.length === 0 && drivers.length === 0) {
+    return res.json({ vehicle: null, driver: null, message: 'No available vehicles or drivers.' });
+  }
+
+  // ── Score vehicles ────────────────────────────────────────────────────────────
+  // Weights: capacity-fit(35) + fuel-efficiency(35) + odometer-health(30)
+  const scoredVehicles = vehicles.map(v => {
+    const reasons: string[] = ['Available'];
+    let score = 0;
+
+    // Capacity fit — must be sufficient; bonus for tight fit (less wasted capacity)
+    const capacityFit = v.maxLoadCapacityKg >= cargoWeightKg;
+    if (!capacityFit && cargoWeightKg > 0) {
+      score -= 1000; // hard penalty — disqualify under-capacity vehicles
+      reasons.push('⚠ Capacity insufficient');
+    } else {
+      score += 35;
+      if (cargoWeightKg > 0) {
+        const utilisation = cargoWeightKg / v.maxLoadCapacityKg;
+        score += Math.round(utilisation * 10); // bonus for good load utilisation
+      }
+      reasons.push('Capacity sufficient');
+    }
+
+    // Fuel efficiency — compute avg km/L from completed trip history
+    const completedWithFuel = v.trips.filter(t => t.fuelConsumed && t.fuelConsumed > 0 && t.plannedDistanceKm > 0);
+    if (completedWithFuel.length > 0) {
+      const avgKmPerL = completedWithFuel.reduce((sum, t) => sum + t.plannedDistanceKm / (t.fuelConsumed!), 0) / completedWithFuel.length;
+      score += Math.min(35, Math.round(avgKmPerL * 3)); // cap at 35 pts
+      reasons.push(`${avgKmPerL.toFixed(1)} km/L avg efficiency`);
+    } else {
+      score += 20; // neutral score for new vehicles
+      reasons.push('Fuel history not yet available');
+    }
+
+    // Odometer health — lower odometer = better vehicle condition
+    const maxOdometer = 200000;
+    const odometerScore = Math.max(0, 30 - Math.round((v.odometer / maxOdometer) * 30));
+    score += odometerScore;
+    if (v.odometer < 50000) reasons.push('Low mileage');
+
+    return { vehicle: v, score, reasons };
+  });
+
+  scoredVehicles.sort((a, b) => b.score - a.score);
+  const bestVehicleEntry = scoredVehicles[0];
+
+  // ── Score drivers ─────────────────────────────────────────────────────────────
+  // Weights: safety-score(40) + license-validity(30) + low-workload(30)
+  const scoredDrivers = drivers.map(d => {
+    const reasons: string[] = ['Available', 'License valid'];
+    let score = 0;
+
+    // Safety score (0–100 scale)
+    score += Math.round((d.safetyScore / 100) * 40);
+    if (d.safetyScore >= 90) reasons.push(`Safety score ${d.safetyScore.toFixed(0)}/100 (Excellent)`);
+    else if (d.safetyScore >= 75) reasons.push(`Safety score ${d.safetyScore.toFixed(0)}/100 (Good)`);
+    else reasons.push(`Safety score ${d.safetyScore.toFixed(0)}/100`);
+
+    // License validity — bonus for licenses far from expiry
+    const daysUntilExpiry = Math.floor((new Date(d.licenseExpiryDate).getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    if (daysUntilExpiry > 365) { score += 30; reasons.push('License valid > 1 year'); }
+    else if (daysUntilExpiry > 90) { score += 20; reasons.push(`License valid ${daysUntilExpiry}d`); }
+    else { score += 5; reasons.push(`License expires soon (${daysUntilExpiry}d)`); }
+
+    // Workload — fewer active trips = lower workload = better
+    const activeTrips = d.trips.length;
+    if (activeTrips === 0) { score += 30; reasons.push('Lowest workload'); }
+    else { score += Math.max(0, 30 - activeTrips * 10); reasons.push(`${activeTrips} active trip(s)`); }
+
+    return { driver: d, score, reasons };
+  });
+
+  scoredDrivers.sort((a, b) => b.score - a.score);
+  const bestDriverEntry = scoredDrivers[0];
+
+  return res.json({
+    vehicle: bestVehicleEntry ? {
+      id: bestVehicleEntry.vehicle.id,
+      registrationNumber: bestVehicleEntry.vehicle.registrationNumber,
+      nameModel: bestVehicleEntry.vehicle.nameModel,
+      maxLoadCapacityKg: bestVehicleEntry.vehicle.maxLoadCapacityKg,
+      score: bestVehicleEntry.score,
+      reasons: bestVehicleEntry.reasons,
+    } : null,
+    driver: bestDriverEntry ? {
+      id: bestDriverEntry.driver.id,
+      name: bestDriverEntry.driver.name,
+      licenseNumber: bestDriverEntry.driver.licenseNumber,
+      safetyScore: bestDriverEntry.driver.safetyScore,
+      score: bestDriverEntry.score,
+      reasons: bestDriverEntry.reasons,
+    } : null,
+    allVehicleCount: vehicles.length,
+    allDriverCount: drivers.length,
+  });
+});
+// ── End Smart Dispatch Assistant ──────────────────────────────────────────────
+
 router.get('/:id', verifyToken, async (req, res) => {
   const trip = await prisma.trip.findUnique({
     where: { id: req.params.id },

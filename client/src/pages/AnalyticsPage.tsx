@@ -44,7 +44,7 @@ export default function AnalyticsPage() {
   const topCostliest = [...(vehicleRoi || [])].sort((a, b) => b.totalCost - a.totalCost).slice(0, 6);
   const topRoi = [...(vehicleRoi || [])].sort((a, b) => b.roi - a.roi).slice(0, 5);
 
-  const COLORS = ['#3b1679', '#5b21b6', '#7c3aed', '#a78bfa', '#c4b5fd', '#ede9fe'];
+  const COLORS = ['#4a1772', '#6b21a8', '#9333ea', '#c084fc', '#d8b4fe', '#f3e8ff'];
 
   return (
     <div className="p-6 space-y-6">
@@ -114,7 +114,14 @@ export default function AnalyticsPage() {
                 <XAxis dataKey="month" tick={{ fill: '#9ca3af', fontSize: 11 }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fill: '#9ca3af', fontSize: 11 }} axisLine={false} tickLine={false} width={60} />
                 <Tooltip
-                  contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: 8 }}
+                  contentStyle={{
+                    background: 'rgb(var(--color-dark-700))',
+                    border: '1px solid rgb(var(--color-dark-500))',
+                    borderRadius: 8,
+                    color: 'rgb(var(--color-gray-100))'
+                  }}
+                  itemStyle={{ color: 'rgb(var(--color-gray-100))' }}
+                  labelStyle={{ color: 'rgb(var(--color-gray-400))' }}
                   formatter={(v: number) => [`₹${v.toLocaleString()}`, 'Revenue']}
                 />
                 <Bar dataKey="revenue" fill="#d97706" radius={[4, 4, 0, 0]} maxBarSize={48} />
@@ -136,7 +143,14 @@ export default function AnalyticsPage() {
                 <YAxis dataKey="name" type="category" tick={{ fill: '#9ca3af', fontSize: 9 }} axisLine={false} tickLine={false} width={130}
                   tickFormatter={v => v.split(' ')[0]} />
                 <Tooltip
-                  contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: 8 }}
+                  contentStyle={{
+                    background: 'rgb(var(--color-dark-700))',
+                    border: '1px solid rgb(var(--color-dark-500))',
+                    borderRadius: 8,
+                    color: 'rgb(var(--color-gray-100))'
+                  }}
+                  itemStyle={{ color: 'rgb(var(--color-gray-100))' }}
+                  labelStyle={{ color: 'rgb(var(--color-gray-400))' }}
                   formatter={(v: number) => [`₹${v.toLocaleString()}`, 'Total Cost']}
                 />
                 <Bar dataKey="totalCost" radius={[0, 4, 4, 0]} maxBarSize={28}>
