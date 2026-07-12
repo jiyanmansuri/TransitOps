@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Bell, AlertTriangle, ShieldAlert, Wrench, Navigation, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Bell, AlertTriangle, ShieldAlert, Wrench, Navigation, CheckCircle, Truck, User, MapPin } from 'lucide-react';
 import api from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 
@@ -16,6 +17,7 @@ interface Driver {
   id: string;
   name: string;
   licenseExpiryDate: string;
+  licenseNumber: string;
 }
 
 interface Trip {
@@ -37,10 +39,15 @@ const roleColors: Record<string, string> = {
 
 export default function TopBar() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
 
-  // Queries for live notification engine
+  // Queries for live search & notification engines
   const { data: vehicles = [] } = useQuery<Vehicle[]>({
     queryKey: ['vehicles'],
     queryFn: () => api.get('/vehicles').then(r => r.data),
@@ -55,6 +62,23 @@ export default function TopBar() {
     queryKey: ['trips'],
     queryFn: () => api.get('/trips').then(r => r.data),
   });
+
+  // --- Dynamic Search Engine ---
+  const query = searchQuery.trim().toLowerCase();
+  
+  const matchedVehicles = query.length >= 2 
+    ? vehicles.filter(v => v.registrationNumber.toLowerCase().includes(query) || v.nameModel.toLowerCase().includes(query)).slice(0, 3)
+    : [];
+
+  const matchedDrivers = query.length >= 2
+    ? drivers.filter(d => d.name.toLowerCase().includes(query) || d.licenseNumber.toLowerCase().includes(query)).slice(0, 3)
+    : [];
+
+  const matchedTrips = query.length >= 2
+    ? trips.filter(t => t.tripCode.toLowerCase().includes(query) || t.source.toLowerCase().includes(query) || t.destination.toLowerCase().includes(query)).slice(0, 3)
+    : [];
+
+  const hasSearchResults = matchedVehicles.length > 0 || matchedDrivers.length > 0 || matchedTrips.length > 0;
 
   // Dynamic alerts builder
   const alerts: Array<{ id: string; title: string; message: string; type: 'danger' | 'warning' | 'info'; icon: React.ReactNode }> = [];
@@ -107,6 +131,9 @@ export default function TopBar() {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowNotifications(false);
       }
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -114,14 +141,107 @@ export default function TopBar() {
 
   return (
     <header className="h-14 bg-dark-800 border-b border-dark-500 flex items-center px-6 gap-4 sticky top-0 z-40">
-      {/* Search Bar */}
-      <div className="flex-1 max-w-sm relative">
+      {/* Global Search Engine */}
+      <div className="flex-1 max-w-sm relative" ref={searchRef}>
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
         <input
           type="text"
+          value={searchQuery}
+          onChange={e => {
+            setSearchQuery(e.target.value);
+            setShowSearchResults(true);
+          }}
+          onFocus={() => setShowSearchResults(true)}
           placeholder="Search registration, drivers, routes..."
           className="input pl-9 h-9 bg-dark-700"
         />
+
+        {/* Floating Search Results */}
+        {showSearchResults && searchQuery.trim().length >= 2 && (
+          <div className="absolute left-0 right-0 mt-2 bg-dark-700 border border-dark-500 rounded-xl shadow-2xl overflow-hidden max-h-80 overflow-y-auto z-50 divide-y divide-dark-600">
+            {/* Header */}
+            <div className="p-2 bg-dark-600 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+              Quick Search Results
+            </div>
+
+            {!hasSearchResults ? (
+              <div className="p-4 text-center text-xs text-gray-500">
+                No matching assets, drivers, or trips found.
+              </div>
+            ) : (
+              <>
+                {/* Vehicles Results */}
+                {matchedVehicles.length > 0 && (
+                  <div className="p-2">
+                    <div className="text-[10px] font-bold text-accent-amber uppercase px-2 mb-1">Vehicles</div>
+                    {matchedVehicles.map(v => (
+                      <button
+                        key={v.id}
+                        onClick={() => {
+                          setShowSearchResults(false);
+                          setSearchQuery('');
+                          navigate(`/fleet?search=${v.registrationNumber}`);
+                        }}
+                        className="w-full text-left p-2 hover:bg-dark-600 rounded-lg flex items-center gap-2.5 text-xs text-gray-200"
+                      >
+                        <Truck size={14} className="text-gray-400" />
+                        <span className="font-mono font-bold text-white">{v.registrationNumber}</span>
+                        <span className="text-gray-500">—</span>
+                        <span>{v.nameModel}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Drivers Results */}
+                {matchedDrivers.length > 0 && (
+                  <div className="p-2">
+                    <div className="text-[10px] font-bold text-emerald-400 uppercase px-2 mb-1">Drivers</div>
+                    {matchedDrivers.map(d => (
+                      <button
+                        key={d.id}
+                        onClick={() => {
+                          setShowSearchResults(false);
+                          setSearchQuery('');
+                          navigate(`/drivers`);
+                        }}
+                        className="w-full text-left p-2 hover:bg-dark-600 rounded-lg flex items-center gap-2.5 text-xs text-gray-200"
+                      >
+                        <User size={14} className="text-gray-400" />
+                        <span className="font-bold text-white">{d.name}</span>
+                        <span className="text-gray-500">—</span>
+                        <span className="font-mono text-[10px] text-gray-400">{d.licenseNumber}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Trips Results */}
+                {matchedTrips.length > 0 && (
+                  <div className="p-2">
+                    <div className="text-[10px] font-bold text-blue-400 uppercase px-2 mb-1">Trips</div>
+                    {matchedTrips.map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => {
+                          setShowSearchResults(false);
+                          setSearchQuery('');
+                          navigate(`/trips`);
+                        }}
+                        className="w-full text-left p-2 hover:bg-dark-600 rounded-lg flex items-center gap-2.5 text-xs text-gray-200"
+                      >
+                        <MapPin size={14} className="text-gray-400" />
+                        <span className="font-mono font-bold text-white">{t.tripCode}</span>
+                        <span className="text-gray-500">—</span>
+                        <span>{t.source} to {t.destination}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="flex-1" />
