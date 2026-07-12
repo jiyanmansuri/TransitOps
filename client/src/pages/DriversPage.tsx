@@ -128,7 +128,7 @@ export default function DriversPage() {
                         <div className="w-7 h-7 rounded-full bg-dark-500 flex items-center justify-center text-xs font-bold text-gray-300">
                           {d.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                         </div>
-                        <span className="font-medium text-white">{d.name}</span>
+                        <span className="font-medium text-gray-100">{d.name}</span>
                       </div>
                     </td>
                     <td className="table-cell font-mono text-gray-300 text-xs">{d.licenseNumber}</td>

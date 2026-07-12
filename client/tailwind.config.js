@@ -6,19 +6,19 @@ export default {
     extend: {
       colors: {
         dark: {
-          900: 'var(--bg-canvas)',
-          800: 'var(--bg-surface-elevated)',
-          700: 'var(--bg-surface-card)',
-          600: 'var(--bg-surface-row)',
-          500: 'var(--border-line)',
-          400: 'var(--border-focus)',
+          900: 'rgb(var(--bg-canvas) / <alpha-value>)',
+          800: 'rgb(var(--bg-surface-elevated) / <alpha-value>)',
+          700: 'rgb(var(--bg-surface-card) / <alpha-value>)',
+          600: 'rgb(var(--bg-surface-row) / <alpha-value>)',
+          500: 'rgb(var(--border-line) / <alpha-value>)',
+          400: 'rgb(var(--border-focus) / <alpha-value>)',
         },
         gray: {
-          100: 'var(--text-main)',
-          200: 'var(--text-main-muted)',
-          300: 'var(--text-muted)',
-          400: 'var(--text-sub)',
-          500: 'var(--text-muted-dark)',
+          100: 'rgb(var(--text-main) / <alpha-value>)',
+          200: 'rgb(var(--text-main-muted) / <alpha-value>)',
+          300: 'rgb(var(--text-muted) / <alpha-value>)',
+          400: 'rgb(var(--text-sub) / <alpha-value>)',
+          500: 'rgb(var(--text-muted-dark) / <alpha-value>)',
         },
         accent: {
           amber: '#f59e0b',

@@ -18,8 +18,8 @@ export default function Modal({ title, onClose, children, size = 'md' }: ModalPr
       {/* Panel */}
       <div className={`relative bg-dark-700 rounded-xl border border-dark-400 shadow-2xl w-full ${sizeClass} max-h-[90vh] flex flex-col`}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-dark-500">
-          <h2 className="text-base font-semibold text-white">{title}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors p-1 rounded hover:bg-dark-500">
+          <h2 className="text-base font-semibold text-gray-100">{title}</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-100 transition-colors p-1 rounded hover:bg-dark-500">
             <X size={18} />
           </button>
         </div>

@@ -108,7 +108,7 @@ export default function SettingsPage() {
               {ROLES.map(role => (
                 <tr key={role} className="table-row">
                   <td className="table-cell">
-                    <div className="font-semibold text-white">{ROLE_LABELS[role]}</div>
+                    <div className="font-semibold text-gray-100">{ROLE_LABELS[role]}</div>
                   </td>
                   {MODULES.map(module => (
                     <td key={module} className="table-cell text-center">

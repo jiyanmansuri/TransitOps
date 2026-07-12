@@ -4,40 +4,40 @@
 @tailwind utilities;
 
 :root {
-  --bg-canvas: #000000;
-  --bg-surface-elevated: #08080a;
-  --bg-surface-card: #0f0f12;
-  --bg-surface-row: #15151c;
-  --border-line: #1e1e26;
-  --border-focus: #2c2c38;
+  --bg-canvas: 0 0 0;
+  --bg-surface-elevated: 0 0 0;
+  --bg-surface-card: 15 15 18;
+  --bg-surface-row: 21 21 28;
+  --border-line: 30 30 38;
+  --border-focus: 44 44 56;
   
-  --text-main: #f3f4f6;
-  --text-main-muted: #e5e7eb;
-  --text-muted: #9ca3af;
-  --text-sub: #6b7280;
-  --text-muted-dark: #4b5563;
+  --text-main: 243 244 246;
+  --text-main-muted: 229 231 235;
+  --text-muted: 156 163 175;
+  --text-sub: 107 114 128;
+  --text-muted-dark: 75 85 99;
 }
 
 html.light {
-  --bg-canvas: #f8fafc;
-  --bg-surface-elevated: #ffffff;
-  --bg-surface-card: #ffffff;
-  --bg-surface-row: #f1f5f9;
-  --border-line: #cbd5e1;
-  --border-focus: #94a3b8;
+  --bg-canvas: 248 250 252;
+  --bg-surface-elevated: 255 255 255;
+  --bg-surface-card: 255 255 255;
+  --bg-surface-row: 241 245 249;
+  --border-line: 203 213 225;
+  --border-focus: 148 163 184;
   
-  --text-main: #0f172a;
-  --text-main-muted: #1e293b;
-  --text-muted: #475569;
-  --text-sub: #64748b;
-  --text-muted-dark: #94a3b8;
+  --text-main: 15 23 42;
+  --text-main-muted: 30 41 59;
+  --text-muted: 71 85 105;
+  --text-sub: 100 116 139;
+  --text-muted-dark: 148 163 184;
 }
 
 @layer base {
   * { box-sizing: border-box; }
   body {
-    background-color: var(--bg-canvas);
-    color: var(--text-main);
+    background-color: rgb(var(--bg-canvas));
+    color: rgb(var(--text-main));
     font-size: 14px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -80,7 +80,7 @@ html.light {
     @apply hover:bg-dark-600/30 transition-all duration-200;
   }
   .page-title {
-    @apply text-2xl font-extrabold text-white tracking-tight;
+    @apply text-2xl font-extrabold text-gray-100 tracking-tight;
   }
   .section-title {
     @apply text-sm font-bold text-gray-400 uppercase tracking-wider mb-5 flex items-center gap-2;

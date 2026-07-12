@@ -29,7 +29,7 @@ export default function KPICard({ label, value, icon, accentColor = 'amber', sub
     <div className={`card border-l-4 ${borderColors[accentColor]} flex items-start justify-between gap-3`}>
       <div className="flex-1 min-w-0">
         <p className="text-xs text-gray-400 font-medium mb-1 uppercase tracking-wide">{label}</p>
-        <p className="text-2xl font-bold text-white tabular-nums">{value}</p>
+        <p className="text-2xl font-bold text-gray-100 tabular-nums">{value}</p>
         {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
       </div>
       {icon && (

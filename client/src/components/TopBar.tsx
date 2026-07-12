@@ -154,7 +154,7 @@ export default function TopBar() {
   }, []);
 
   return (
-    <header className="h-14 bg-dark-900 border-b border-dark-500 flex items-center px-6 gap-4 sticky top-0 z-40">
+    <header className="h-14 bg-dark-800 border-b border-dark-500 flex items-center px-6 gap-4 sticky top-0 z-40">
       {/* Global Search Engine */}
       <div className="flex-1 max-w-sm relative" ref={searchRef}>
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />

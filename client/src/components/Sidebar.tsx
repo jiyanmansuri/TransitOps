@@ -35,9 +35,9 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="w-60 flex-shrink-0 bg-dark-900 border-r border-dark-500 flex flex-col h-screen sticky top-0">
+    <aside className="w-60 flex-shrink-0 bg-dark-800 border-r border-dark-500 flex flex-col h-screen sticky top-0">
       {/* Logo */}
-      <div className="p-5 border-b border-dark-500/80 bg-gradient-to-b from-black to-transparent">
+      <div className="p-5 border-b border-dark-500/80">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-dark-700 to-dark-800 border border-dark-500 flex items-center justify-center shadow-lg shadow-black/80 hover:border-accent-amber/40 transition-all duration-500 group cursor-pointer">
             <Compass size={16} className="text-accent-amber drop-shadow-[0_0_6px_rgba(245,158,11,0.6)] group-hover:rotate-45 transition-transform duration-500" />
@@ -86,7 +86,7 @@ export default function Sidebar() {
             {user?.name?.split(' ').map(n => n[0]).join('').slice(0, 2)}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-white text-xs font-semibold truncate">{user?.name}</div>
+            <div className="text-gray-100 text-xs font-semibold truncate">{user?.name}</div>
             <div className="text-gray-500 text-[10px] truncate">{user?.role}</div>
           </div>
         </div>
