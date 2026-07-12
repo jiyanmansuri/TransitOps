@@ -1,24 +1,6 @@
 <div align="center">
 
-<svg viewBox="0 0 500 120" width="400" height="96" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    .wordmark { fill: #111827; }
-    .tagline { fill: #4B5563; }
-    @media (prefers-color-scheme: dark) {
-      .wordmark { fill: #F9FAFB; }
-      .tagline { fill: #9CA3AF; }
-    }
-  </style>
-  <!-- Hexagon mark -->
-  <polygon points="50,10 93,35 93,75 50,100 7,75 7,35" fill="#6B4D62" />
-  <!-- Trendline -->
-  <path d="M22,65 L42,47 L62,61 L76,39" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
-  <!-- Circle dot -->
-  <circle cx="76" cy="39" r="7" fill="#FFFFFF" />
-  <!-- Text -->
-  <text x="120" y="58" class="wordmark" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="36" font-weight="800" letter-spacing="-0.5px">TransitOps</text>
-  <text x="120" y="84" class="tagline" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="500">smart transport operations platform</text>
-</svg>
+<img src="logo.svg" width="400" height="96" alt="TransitOps Logo" />
 
 ---
 
