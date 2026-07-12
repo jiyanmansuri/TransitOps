@@ -19,6 +19,12 @@ router.post('/logs', verifyToken, requireRole('FinancialAnalyst', 'Dispatcher'),
   if (!vehicleId || !date || !liters || !cost) {
     return res.status(400).json({ error: 'All fields are required' });
   }
+  
+  const vehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } });
+  if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
+  if (vehicle.status === 'Retired') {
+    return res.status(400).json({ error: 'Cannot log fuel for a retired vehicle' });
+  }
   const log = await prisma.fuelLog.create({
     data: { vehicleId, date: new Date(date), liters: parseFloat(liters), cost: parseFloat(cost) },
     include: { vehicle: { select: { registrationNumber: true, nameModel: true } } }
@@ -71,16 +77,20 @@ router.post('/expenses', verifyToken, requireRole('FinancialAnalyst'), async (re
 });
 
 router.get('/summary', verifyToken, async (_req, res) => {
-  const [fuelAgg, maintAgg] = await Promise.all([
+  const [fuelAgg, maintAgg, expAgg] = await Promise.all([
     prisma.fuelLog.aggregate({ _sum: { cost: true } }),
     prisma.maintenanceRecord.aggregate({ _sum: { cost: true } }),
+    prisma.expense.aggregate({ _sum: { toll: true, other: true } })
   ]);
   const totalFuel = fuelAgg._sum.cost || 0;
   const totalMaint = maintAgg._sum.cost || 0;
+  const totalTolls = expAgg._sum.toll || 0;
+  const totalOther = expAgg._sum.other || 0;
+  
   return res.json({
     totalFuelCost: totalFuel,
     totalMaintenanceCost: totalMaint,
-    totalOperationalCost: totalFuel + totalMaint
+    totalOperationalCost: totalFuel + totalMaint + totalTolls + totalOther
   });
 });
 

@@ -52,8 +52,18 @@ router.post('/login', async (req, res) => {
   return res.json({ token, user: { id: user.id, name: user.name, email: user.email, role } });
 });
 
-router.get('/me', verifyToken, (req: AuthRequest, res) => {
-  return res.json({ user: req.user });
+router.get('/me', verifyToken, async (req: AuthRequest, res) => {
+  if (!req.user?.userId) return res.status(401).json({ error: 'Invalid token payload' });
+  const dbUser = await prisma.user.findUnique({ where: { id: req.user.userId } });
+  if (!dbUser) return res.status(401).json({ error: 'User not found' });
+  
+  return res.json({
+    user: {
+      ...req.user,
+      name: dbUser.name, // Ensure we return the most fresh name from DB
+      email: dbUser.email
+    }
+  });
 });
 
 export default router;

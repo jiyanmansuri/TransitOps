@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Users, AlertTriangle, CheckCircle, UserX } from 'lucide-react';
+import { Plus, Users, AlertTriangle, CheckCircle, Clock, Truck } from 'lucide-react';
 import api from '../api/client';
 import StatusBadge from '../components/StatusBadge';
 import Modal from '../components/Modal';
+import DriverProfileModal from '../components/DriverProfileModal';
 import { useAuth } from '../hooks/useAuth';
 import { canAccess } from '../hooks/useRBAC';
 
@@ -17,6 +18,9 @@ interface Driver {
   safetyScore: number;
   status: string;
   tripCompletionRate: number;
+  vehicleAssigned?: string | null;
+  lastShiftHours?: number | null;
+  activeIncidents?: string[];
 }
 
 const DRIVER_STATUSES = ['Available', 'OnTrip', 'OffDuty', 'Suspended'];
@@ -33,6 +37,8 @@ export default function DriversPage() {
   const canEdit = canAccess(user?.role || '', 'Drivers', 'edit');
 
   const [showModal, setShowModal] = useState(false);
+  const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('All');
   const [form, setForm] = useState(emptyForm);
   const [formError, setFormError] = useState('');
 
@@ -71,6 +77,16 @@ export default function DriversPage() {
 
   const isExpired = (dateStr: string) => new Date(dateStr) < new Date();
 
+  const filteredDrivers = useMemo(() => {
+    return drivers.filter(d => {
+      if (activeTab === 'Available') return d.status === 'Available';
+      if (activeTab === 'On Trip') return d.status === 'OnTrip';
+      if (activeTab === 'Expired') return isExpired(d.licenseExpiryDate);
+      if (activeTab === 'Suspended') return d.status === 'Suspended';
+      return true;
+    });
+  }, [drivers, activeTab]);
+
   return (
     <div className="p-6 space-y-5">
       <div className="flex items-center justify-between">
@@ -94,6 +110,28 @@ export default function DriversPage() {
         )}
       </div>
 
+      {/* Filter Tabs */}
+      <div className="flex items-center gap-1 border-b border-dark-500 pb-px">
+        {[
+          { id: 'All', label: `All Drivers ${drivers.length}` },
+          { id: 'Available', label: `Available ${drivers.filter(d => d.status === 'Available').length}` },
+          { id: 'On Trip', label: `On Trip ${drivers.filter(d => d.status === 'OnTrip').length}` },
+          { id: 'Expired', label: `Expired Licenses ${drivers.filter(d => isExpired(d.licenseExpiryDate)).length}` },
+          { id: 'Suspended', label: `Suspended ${drivers.filter(d => d.status === 'Suspended').length}` }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${activeTab === tab.id ? 'border-accent-amber text-accent-amber' : 'border-transparent text-gray-400 hover:text-gray-200'}`}
+          >
+            {tab.label.replace(/[0-9]+$/, '')}
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-accent-amber/20 text-accent-amber' : 'bg-dark-600 text-gray-400'}`}>
+              {tab.label.match(/[0-9]+$/)?.[0]}
+            </span>
+          </button>
+        ))}
+      </div>
+
       {/* Table */}
       <div className="card p-0 overflow-hidden">
         <div className="overflow-x-auto">
@@ -101,56 +139,68 @@ export default function DriversPage() {
             <thead className="bg-dark-600">
               <tr>
                 <th className="table-header">Driver</th>
-                <th className="table-header">License No.</th>
-                <th className="table-header">Category</th>
-                <th className="table-header">Expiry</th>
-                <th className="table-header">Contact</th>
-                <th className="table-header">Completion %</th>
+                <th className="table-header">Assigned Vehicle</th>
+                <th className="table-header">Weekly Hours</th>
+                <th className="table-header">License Exp.</th>
                 <th className="table-header">Safety Score</th>
+                <th className="table-header">Recent Alerts</th>
                 <th className="table-header">Status</th>
                 {canEdit && <th className="table-header">Set Status</th>}
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={9} className="table-cell text-center text-gray-500 py-12">Loading...</td></tr>
-              ) : drivers.length === 0 ? (
-                <tr><td colSpan={9} className="table-cell text-center text-gray-500 py-12">
+                <tr><td colSpan={8} className="table-cell text-center text-gray-500 py-12">Loading...</td></tr>
+              ) : filteredDrivers.length === 0 ? (
+                <tr><td colSpan={8} className="table-cell text-center text-gray-500 py-12">
                   <Users size={32} className="mx-auto mb-3 opacity-30" />
-                  No drivers found
+                  No drivers found for '{activeTab}'
                 </td></tr>
-              ) : drivers.map(d => {
+              ) : filteredDrivers.map(d => {
                 const expired = isExpired(d.licenseExpiryDate);
                 return (
                   <tr key={d.id} className={`table-row ${expired ? 'bg-red-500/5' : ''}`}>
                     <td className="table-cell">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full bg-dark-500 flex items-center justify-center text-xs font-bold text-gray-300">
+                      <button onClick={() => setSelectedDriverId(d.id)} className="flex items-center gap-2.5 text-left group hover:text-accent-amber transition-colors">
+                        <div className="w-7 h-7 rounded-full bg-dark-500 group-hover:bg-accent-amber/20 flex items-center justify-center text-xs font-bold text-gray-300 group-hover:text-accent-amber transition-colors">
                           {d.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                         </div>
-                        <span className="font-medium text-white">{d.name}</span>
-                      </div>
+                        <div>
+                          <span className="font-medium text-white group-hover:text-accent-amber transition-colors block">{d.name}</span>
+                          <span className="text-[10px] text-gray-500">{d.contactNumber}</span>
+                        </div>
+                      </button>
                     </td>
-                    <td className="table-cell font-mono text-gray-300 text-xs">{d.licenseNumber}</td>
-                    <td className="table-cell text-gray-400">{d.licenseCategory}</td>
                     <td className="table-cell">
-                      <span className={`text-xs flex items-center gap-1 ${expired ? 'text-red-400' : 'text-gray-400'}`}>
+                      {d.vehicleAssigned ? (
+                        <div className="flex items-center gap-1.5 text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded w-fit">
+                          <Truck size={12} /> {d.vehicleAssigned}
+                        </div>
+                      ) : (
+                        <span className="text-gray-500 text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="table-cell">
+                      {d.lastShiftHours ? (
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-1.5 text-xs text-gray-300">
+                            <Clock size={12} className="text-amber-400" /> {d.lastShiftHours}h (7d)
+                          </div>
+                          {d.lastShiftHours > 40 && (
+                            <span className="text-[10px] text-red-400 font-bold bg-red-500/10 px-1.5 py-0.5 rounded w-fit border border-red-500/20">
+                              ⚠️ FATIGUE RISK
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-gray-500 text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="table-cell">
+                      <span className={`text-xs flex items-center gap-1 ${expired ? 'text-red-400 font-semibold' : 'text-gray-400'}`}>
                         {expired ? <AlertTriangle size={12} /> : <CheckCircle size={12} />}
                         {new Date(d.licenseExpiryDate).toLocaleDateString('en-IN')}
-                        {expired && <span className="text-red-400 font-semibold">(EXPIRED)</span>}
                       </span>
-                    </td>
-                    <td className="table-cell text-gray-400">{d.contactNumber}</td>
-                    <td className="table-cell">
-                      <div className="flex items-center gap-2">
-                        <div className="w-16 h-1.5 bg-dark-500 rounded-full overflow-hidden">
-                          <div
-                            className="h-full rounded-full bg-emerald-500"
-                            style={{ width: `${d.tripCompletionRate}%` }}
-                          />
-                        </div>
-                        <span className="text-xs tabular-nums text-gray-300">{d.tripCompletionRate}%</span>
-                      </div>
                     </td>
                     <td className="table-cell">
                       <div className="flex items-center gap-2">
@@ -164,10 +214,22 @@ export default function DriversPage() {
                       </div>
                     </td>
                     <td className="table-cell">
+                      {d.activeIncidents && d.activeIncidents.length > 0 ? (
+                        <div className="flex flex-wrap gap-1 max-w-[150px]">
+                          {d.activeIncidents.map((inc, idx) => (
+                            <span key={idx} className="text-[10px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded border border-red-500/20 whitespace-nowrap">
+                              {inc}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-gray-500 text-xs">—</span>
+                      )}
+                    </td>
+                    <td className="table-cell">
                       <div className="flex flex-col gap-1">
                         <StatusBadge status={d.status} size="sm" />
-                        {d.status === 'Suspended' && <span className="text-[10px] text-red-400">Cannot be assigned</span>}
-                        {expired && <span className="text-[10px] text-red-400">License expired</span>}
+                        {expired && d.status !== 'Suspended' && <span className="text-[10px] text-red-400">Action Required</span>}
                       </div>
                     </td>
                     {canEdit && (
@@ -176,7 +238,7 @@ export default function DriversPage() {
                           value={d.status}
                           onChange={e => statusMutation.mutate({ id: d.id, status: e.target.value })}
                           className="select text-xs py-1 w-32"
-                          disabled={d.status === 'OnTrip'}
+                          disabled={d.status === 'OnTrip' || expired}
                         >
                           {DRIVER_STATUSES.map(s => (
                             <option key={s} value={s}>{STATUS_LABELS[s]}</option>
@@ -233,6 +295,10 @@ export default function DriversPage() {
             </div>
           </form>
         </Modal>
+      )}
+
+      {selectedDriverId && (
+        <DriverProfileModal driverId={selectedDriverId} onClose={() => setSelectedDriverId(null)} />
       )}
     </div>
   );

@@ -44,6 +44,7 @@ model Driver {
   licenseNumber       String       @unique
   licenseCategory     String
   licenseExpiryDate   DateTime
+  medicalCertExpiry   DateTime?
   contactNumber       String
   safetyScore         Float        @default(100)
   status              String       @default("Available") // Available, OnTrip, OffDuty, Suspended

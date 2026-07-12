@@ -32,6 +32,9 @@ html {
   --color-accent-green-light: 52 211 153;
   --color-accent-red: 239 68 68;
   --color-accent-red-light: 248 113 113;
+
+  /* Logo hex fill — dark mode: bright violet */
+  --logo-hex-fill: #9333ea;
 }
 
 html.light {
@@ -66,6 +69,9 @@ html.light {
   --color-accent-green-light: 5 150 105;
   --color-accent-red: 185 28 28;
   --color-accent-red-light: 220 38 38;
+
+  /* Logo hex fill — light mode: deeper purple for contrast on white */
+  --logo-hex-fill: #7e22ce;
 }
 
 @tailwind base;
@@ -125,6 +131,11 @@ html.light {
   }
   .label {
     @apply text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1.5;
+  }
+
+  /* Light-mode brand name text: switch gradient to dark-text so it reads on white */
+  .logo-brand-text {
+    background-image: linear-gradient(to right, rgb(var(--color-gray-100)), rgb(var(--color-gray-200)), rgb(var(--color-accent-amber)));
   }
 }
 

@@ -16,14 +16,19 @@ router.get('/', verifyToken, async (req, res) => {
   const vehicles = await prisma.vehicle.findMany({
     where,
     orderBy: { createdAt: 'desc' },
-    include: { _count: { select: { trips: true } } }
+    include: { _count: { select: { trips: true } }, documents: true }
   });
   return res.json(vehicles);
 });
 
 router.get('/available', verifyToken, async (_req, res) => {
   const vehicles = await prisma.vehicle.findMany({
-    where: { status: 'Available' },
+    where: { 
+      status: 'Available',
+      trips: {
+        none: { status: { in: ['Draft', 'Dispatched'] } }
+      }
+    },
     orderBy: { registrationNumber: 'asc' }
   });
   return res.json(vehicles);

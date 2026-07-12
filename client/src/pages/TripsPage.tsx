@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
-import { Plus, AlertTriangle, CheckCircle, XCircle, ArrowRight, Navigation } from 'lucide-react';
+import { Plus, AlertTriangle, CheckCircle, XCircle, ArrowRight, Navigation, Search, Clock } from 'lucide-react';
 import api from '../api/client';
 import StatusBadge from '../components/StatusBadge';
 import Modal from '../components/Modal';
+import TripDetailsModal from '../components/TripDetailsModal';
 import SmartDispatchPanel from '../components/SmartDispatchPanel';
 import { useAuth } from '../hooks/useAuth';
 import { canAccess } from '../hooks/useRBAC';
@@ -44,6 +45,7 @@ export default function TripsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [showCreate, setShowCreate] = useState(false);
+  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
 
   useEffect(() => {
     if (searchParams.get('create') === 'true') {
@@ -60,13 +62,29 @@ export default function TripsPage() {
   const [completeForm, setCompleteForm] = useState(emptyCompleteForm);
   const [formError, setFormError] = useState('');
   const [capacityWarning, setCapacityWarning] = useState('');
-  const [statusFilter, setStatusFilter] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('All');
 
-  const { data: trips = [], isLoading } = useQuery<Trip[]>({
-    queryKey: ['trips', statusFilter],
-    queryFn: () => api.get('/trips', { params: { status: statusFilter !== 'All' ? statusFilter : undefined } }).then(r => r.data),
+  const { data: allTrips = [], isLoading } = useQuery<Trip[]>({
+    queryKey: ['trips'],
+    queryFn: () => api.get('/trips').then(r => r.data),
     refetchInterval: 15000,
   });
+
+  const trips = useMemo(() => {
+    return allTrips.filter(t => {
+      const matchesTab = activeTab === 'All' || t.status === activeTab;
+      const q = searchQuery.toLowerCase();
+      const matchesSearch = !q || 
+        t.tripCode.toLowerCase().includes(q) ||
+        (t.driver?.name || '').toLowerCase().includes(q) ||
+        (t.vehicle?.registrationNumber || '').toLowerCase().includes(q) ||
+        t.source.toLowerCase().includes(q) ||
+        t.destination.toLowerCase().includes(q);
+      
+      return matchesTab && matchesSearch;
+    });
+  }, [allTrips, activeTab, searchQuery]);
 
   const { data: availableVehicles = [] } = useQuery<Vehicle[]>({
     queryKey: ['vehicles-available'],
@@ -146,14 +164,25 @@ export default function TripsPage() {
     }
   };
 
-  const activeLiveTrips = trips.filter(t => t.status === 'Dispatched');
+  const activeLiveTrips = useMemo(() => {
+    return allTrips.filter(t => {
+      if (t.status !== 'Dispatched') return false;
+      const q = searchQuery.toLowerCase();
+      if (!q) return true;
+      return t.tripCode.toLowerCase().includes(q) ||
+        (t.driver?.name || '').toLowerCase().includes(q) ||
+        (t.vehicle?.registrationNumber || '').toLowerCase().includes(q) ||
+        t.source.toLowerCase().includes(q) ||
+        t.destination.toLowerCase().includes(q);
+    });
+  }, [allTrips, searchQuery]);
 
   return (
     <div className="p-6 space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="page-title">Trip Dispatcher</h1>
-          <p className="text-gray-500 text-sm">{trips.length} total trips</p>
+          <p className="text-gray-500 text-sm">{allTrips.length} total trips</p>
         </div>
         {canEdit && (
           <button onClick={() => { setShowCreate(true); setForm(emptyForm); setFormError(''); setCapacityWarning(''); }} className="btn-primary">
@@ -213,11 +242,38 @@ export default function TripsPage() {
         </div>
       )}
 
-      {/* Filters + Table */}
-      <div className="flex gap-3">
-        <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="select w-40">
-          {['All', 'Draft', 'Dispatched', 'Completed', 'Cancelled'].map(s => <option key={s}>{s}</option>)}
-        </select>
+      {/* Filters + Search */}
+      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between border-b border-dark-500 pb-px">
+        <div className="flex items-center gap-1 overflow-x-auto w-full md:w-auto">
+          {[
+            { id: 'All', label: `All Trips ${allTrips.length}` },
+            { id: 'Draft', label: `Draft ${allTrips.filter(t => t.status === 'Draft').length}` },
+            { id: 'Dispatched', label: `Dispatched ${allTrips.filter(t => t.status === 'Dispatched').length}` },
+            { id: 'Completed', label: `Completed ${allTrips.filter(t => t.status === 'Completed').length}` },
+            { id: 'Cancelled', label: `Cancelled ${allTrips.filter(t => t.status === 'Cancelled').length}` }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2 text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 whitespace-nowrap ${activeTab === tab.id ? 'border-accent-amber text-accent-amber' : 'border-transparent text-gray-400 hover:text-gray-200'}`}
+            >
+              {tab.label.replace(/[0-9]+$/, '')}
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === tab.id ? 'bg-accent-amber/20 text-accent-amber' : 'bg-dark-600 text-gray-400'}`}>
+                {tab.label.match(/[0-9]+$/)?.[0]}
+              </span>
+            </button>
+          ))}
+        </div>
+        <div className="relative w-full md:w-64 shrink-0 mt-2 md:mt-0">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search trips, drivers, routes..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="input w-full pl-9 py-2 text-sm"
+          />
+        </div>
       </div>
 
       <div className="card p-0 overflow-hidden">
@@ -227,10 +283,11 @@ export default function TripsPage() {
               <tr>
                 <th className="table-header">Code</th>
                 <th className="table-header">Route</th>
+                <th className="table-header">Scheduled / ETA</th>
                 <th className="table-header">Vehicle</th>
                 <th className="table-header">Driver</th>
                 <th className="table-header">Cargo (kg)</th>
-                <th className="table-header">Dist (km)</th>
+                <th className="table-header">Est. Revenue</th>
                 <th className="table-header">Status</th>
                 {canEdit && <th className="table-header">Actions</th>}
               </tr>
@@ -239,19 +296,44 @@ export default function TripsPage() {
               {isLoading ? (
                 <tr><td colSpan={8} className="table-cell text-center text-gray-500 py-12">Loading...</td></tr>
               ) : trips.length === 0 ? (
-                <tr><td colSpan={8} className="table-cell text-center text-gray-500 py-12">No trips found</td></tr>
+                <tr><td colSpan={canEdit ? 9 : 8} className="table-cell text-center text-gray-500 py-12">No trips found</td></tr>
               ) : trips.map(trip => (
                 <tr key={trip.id} className="table-row">
-                  <td className="table-cell font-mono text-accent-amber font-bold">{trip.tripCode}</td>
+                  <td 
+                    className="table-cell font-mono text-accent-amber font-bold cursor-pointer hover:underline"
+                    onClick={() => setSelectedTrip(trip)}
+                  >
+                    {trip.tripCode}
+                  </td>
                   <td className="table-cell text-sm">
                     <span className="text-white">{trip.source}</span>
                     <span className="text-gray-600 mx-1">→</span>
                     <span className="text-gray-300">{trip.destination}</span>
                   </td>
-                  <td className="table-cell text-gray-400 text-xs">{trip.vehicle?.registrationNumber}</td>
-                  <td className="table-cell text-gray-300">{trip.driver?.name}</td>
+                  <td className="table-cell">
+                    {trip.eta ? (
+                      <span className="flex items-center gap-1.5 text-gray-300 text-xs">
+                        <Clock size={12} className="text-gray-400" />
+                        {new Date(trip.eta).toLocaleString('en-IN', {
+                          month: 'short', day: 'numeric',
+                          hour: 'numeric', minute: '2-digit', hour12: true
+                        })}
+                      </span>
+                    ) : (
+                      <span className="text-gray-500 text-xs italic">—</span>
+                    )}
+                  </td>
+                  <td className="table-cell text-gray-400 text-xs">{trip.vehicle?.registrationNumber || '—'}</td>
+                  <td className="table-cell text-gray-300">{trip.driver?.name || '—'}</td>
                   <td className="table-cell tabular-nums">{trip.cargoWeightKg}</td>
-                  <td className="table-cell tabular-nums">{trip.plannedDistanceKm}</td>
+                  <td className="table-cell">
+                    <div className="flex flex-col">
+                      <span className="text-emerald-400 font-medium text-sm">
+                        ₹{(trip.plannedDistanceKm * 50).toLocaleString('en-IN')}
+                      </span>
+                      <span className="text-[10px] text-gray-500">{trip.plannedDistanceKm} km</span>
+                    </div>
+                  </td>
                   <td className="table-cell"><StatusBadge status={trip.status} size="sm" /></td>
                   {canEdit && (
                     <td className="table-cell">
@@ -426,6 +508,8 @@ export default function TripsPage() {
           </form>
         </Modal>
       )}
+
+      {selectedTrip && <TripDetailsModal trip={selectedTrip} onClose={() => setSelectedTrip(null)} />}
     </div>
   );
 }

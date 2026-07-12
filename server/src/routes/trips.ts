@@ -184,6 +184,20 @@ router.post('/', verifyToken, requireRole('Dispatcher'), async (req, res) => {
     return res.status(400).json({ error: 'Driver has an expired license' });
   }
 
+  const activeVehicleTrip = await prisma.trip.findFirst({
+    where: { vehicleId, status: { in: ['Draft', 'Dispatched'] } }
+  });
+  if (activeVehicleTrip) {
+    return res.status(400).json({ error: `Vehicle is concurrently assigned to active trip ${activeVehicleTrip.tripCode}.` });
+  }
+
+  const activePreviousTrip = await prisma.trip.findFirst({
+    where: { driverId, status: { in: ['Draft', 'Dispatched'] } }
+  });
+  if (activePreviousTrip) {
+    return res.status(400).json({ error: `Driver is simultaneously assigned to active trip ${activePreviousTrip.tripCode}.` });
+  }
+
   const tripCode = await generateTripCode();
 
   const trip = await prisma.trip.create({
@@ -237,6 +251,13 @@ router.post('/:id/dispatch', verifyToken, requireRole('Dispatcher'), async (req,
   }
   if (new Date(trip.driver.licenseExpiryDate) < new Date()) {
     return res.status(400).json({ error: 'Driver license has expired' });
+  }
+
+  const activePreviousTrip = await prisma.trip.findFirst({
+    where: { driverId: trip.driverId, status: 'Dispatched' }
+  });
+  if (activePreviousTrip) {
+    return res.status(400).json({ error: `Driver is currently assigned to active trip ${activePreviousTrip.tripCode} and hasn't returned.` });
   }
 
   const [updatedTrip] = await prisma.$transaction([

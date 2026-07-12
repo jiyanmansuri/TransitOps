@@ -119,91 +119,100 @@ export default function FuelPage() {
         <div className="card border-l-4 border-l-purple-500">
           <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Total Operational Cost</p>
           <p className="text-2xl font-bold text-white">₹{(summary?.totalOperationalCost || 0).toLocaleString()}</p>
-          <p className="text-xs text-gray-500 mt-1">Fuel + Maintenance (auto)</p>
+          <p className="text-xs text-gray-500 mt-1">Fuel + Maint + Tolls + Other</p>
         </div>
       </div>
 
-      {/* Fuel Logs */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="section-title mb-0 flex items-center gap-2"><Fuel size={16} className="text-amber-400" />Fuel Logs</h2>
-          {canEdit && (
-            <button onClick={() => { setShowFuelModal(true); setFuelForm(emptyFuelForm); }} className="btn-secondary text-xs py-1.5">
-              <Plus size={13} /> Log Fuel
-            </button>
-          )}
+      {/* Tables Container */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        {/* Fuel Logs */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between mb-0">
+            <h2 className="section-title mb-0 flex items-center gap-2"><Fuel size={16} className="text-amber-400" />Fuel Logs</h2>
+            {canEdit && (
+              <button onClick={() => { setShowFuelModal(true); setFuelForm(emptyFuelForm); }} className="btn-secondary text-xs py-1.5">
+                <Plus size={13} /> Log Fuel
+              </button>
+            )}
+          </div>
+          <div className="card p-0 overflow-hidden">
+            <div className="overflow-x-auto overflow-y-auto max-h-[60vh]">
+              <table className="w-full relative">
+                <thead className="bg-dark-600 sticky top-0 z-10 shadow-sm">
+                  <tr>
+                    <th className="table-header">Vehicle</th>
+                    <th className="table-header">Date</th>
+                    <th className="table-header">Liters</th>
+                    <th className="table-header">Rate (₹/L)</th>
+                    <th className="table-header">Cost (₹)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fuelLogs.length === 0 ? (
+                    <tr><td colSpan={5} className="table-cell text-center text-gray-500 py-8">No fuel logs yet</td></tr>
+                  ) : fuelLogs.map(l => (
+                    <tr key={l.id} className="table-row">
+                      <td className="table-cell">
+                        <div className="text-xs font-mono text-accent-amber">{l.vehicle?.registrationNumber}</div>
+                        <div className="text-xs text-gray-400">{l.vehicle?.nameModel}</div>
+                      </td>
+                      <td className="table-cell text-gray-400">{new Date(l.date).toLocaleDateString('en-IN')}</td>
+                      <td className="table-cell tabular-nums text-gray-300">{l.liters.toFixed(1)} L</td>
+                      <td className="table-cell tabular-nums text-gray-400">₹{(l.cost / l.liters).toFixed(1)}</td>
+                      <td className="table-cell tabular-nums text-white font-semibold">₹{l.cost.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
-        <div className="card p-0 overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-dark-600">
-              <tr>
-                <th className="table-header">Vehicle</th>
-                <th className="table-header">Date</th>
-                <th className="table-header">Liters</th>
-                <th className="table-header">Cost (₹)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {fuelLogs.length === 0 ? (
-                <tr><td colSpan={4} className="table-cell text-center text-gray-500 py-8">No fuel logs yet</td></tr>
-              ) : fuelLogs.map(l => (
-                <tr key={l.id} className="table-row">
-                  <td className="table-cell">
-                    <div className="text-xs font-mono text-accent-amber">{l.vehicle?.registrationNumber}</div>
-                    <div className="text-xs text-gray-400">{l.vehicle?.nameModel}</div>
-                  </td>
-                  <td className="table-cell text-gray-400">{new Date(l.date).toLocaleDateString('en-IN')}</td>
-                  <td className="table-cell tabular-nums text-gray-300">{l.liters.toFixed(1)}L</td>
-                  <td className="table-cell tabular-nums text-white font-semibold">₹{l.cost.toLocaleString()}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
 
-      {/* Expenses */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="section-title mb-0 flex items-center gap-2"><Receipt size={16} className="text-blue-400" />Other Expenses</h2>
-          {canEdit && (
-            <button onClick={() => { setShowExpModal(true); setExpForm(emptyExpForm); }} className="btn-secondary text-xs py-1.5">
-              <Plus size={13} /> Add Expense
-            </button>
-          )}
-        </div>
-        <div className="card p-0 overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-dark-600">
-              <tr>
-                <th className="table-header">Trip</th>
-                <th className="table-header">Vehicle</th>
-                <th className="table-header">Toll (₹)</th>
-                <th className="table-header">Other (₹)</th>
-                <th className="table-header">Maintenance (₹)</th>
-                <th className="table-header">Total (₹)</th>
-                <th className="table-header">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {expenses.length === 0 ? (
-                <tr><td colSpan={7} className="table-cell text-center text-gray-500 py-8">No expenses yet</td></tr>
-              ) : expenses.map(e => (
-                <tr key={e.id} className="table-row">
-                  <td className="table-cell font-mono text-accent-amber text-xs">{e.trip?.tripCode || '—'}</td>
-                  <td className="table-cell text-xs">
-                    <div className="text-accent-amber font-mono">{e.vehicle?.registrationNumber}</div>
-                    <div className="text-gray-400">{e.vehicle?.nameModel}</div>
-                  </td>
-                  <td className="table-cell tabular-nums text-gray-300">{e.toll.toLocaleString()}</td>
-                  <td className="table-cell tabular-nums text-gray-300">{e.other.toLocaleString()}</td>
-                  <td className="table-cell tabular-nums text-gray-400">{e.maintenanceLinkedCost.toLocaleString()}</td>
-                  <td className="table-cell tabular-nums text-white font-bold">₹{e.total.toLocaleString()}</td>
-                  <td className="table-cell"><StatusBadge status={e.status} size="sm" /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {/* Expenses */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between mb-0">
+            <h2 className="section-title mb-0 flex items-center gap-2"><Receipt size={16} className="text-blue-400" />Other Expenses</h2>
+            {canEdit && (
+              <button onClick={() => { setShowExpModal(true); setExpForm(emptyExpForm); }} className="btn-secondary text-xs py-1.5">
+                <Plus size={13} /> Add Expense
+              </button>
+            )}
+          </div>
+          <div className="card p-0 overflow-hidden">
+            <div className="overflow-x-auto overflow-y-auto max-h-[60vh]">
+              <table className="w-full relative">
+                <thead className="bg-dark-600 sticky top-0 z-10 shadow-sm">
+                  <tr>
+                    <th className="table-header">Trip</th>
+                    <th className="table-header">Vehicle</th>
+                    <th className="table-header">Toll (₹)</th>
+                    <th className="table-header">Other (₹)</th>
+                    <th className="table-header">Maintenance (₹)</th>
+                    <th className="table-header">Total (₹)</th>
+                    <th className="table-header">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {expenses.length === 0 ? (
+                    <tr><td colSpan={7} className="table-cell text-center text-gray-500 py-8">No expenses yet</td></tr>
+                  ) : expenses.map(e => (
+                    <tr key={e.id} className="table-row">
+                      <td className="table-cell font-mono text-accent-amber text-xs">{e.trip?.tripCode || '—'}</td>
+                      <td className="table-cell text-xs">
+                        <div className="text-accent-amber font-mono">{e.vehicle?.registrationNumber}</div>
+                        <div className="text-gray-400">{e.vehicle?.nameModel}</div>
+                      </td>
+                      <td className="table-cell tabular-nums text-gray-300">{e.toll.toLocaleString()}</td>
+                      <td className="table-cell tabular-nums text-gray-300">{e.other.toLocaleString()}</td>
+                      <td className="table-cell tabular-nums text-gray-400">{e.maintenanceLinkedCost.toLocaleString()}</td>
+                      <td className="table-cell tabular-nums text-white font-bold">₹{e.total.toLocaleString()}</td>
+                      <td className="table-cell"><StatusBadge status={e.status} size="sm" /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
 

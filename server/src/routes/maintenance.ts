@@ -23,6 +23,15 @@ router.post('/', verifyToken, requireRole('FleetManager'), async (req, res) => {
 
   const maintenanceStatus = status || 'Active';
 
+  if (maintenanceStatus === 'Active') {
+    const existingActive = await prisma.maintenanceRecord.findFirst({
+      where: { vehicleId, status: 'Active' }
+    });
+    if (existingActive) {
+      return res.status(400).json({ error: 'Vehicle already has an active maintenance record' });
+    }
+  }
+
   try {
     const record = await prisma.$transaction(async (tx) => {
       const newRecord = await tx.maintenanceRecord.create({

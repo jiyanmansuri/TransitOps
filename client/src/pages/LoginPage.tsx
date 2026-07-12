@@ -2,7 +2,8 @@ import { useState, FormEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { getDefaultRoute } from '../hooks/useRBAC';
-import { Compass, Eye, EyeOff, Lock, Mail, Shield, Sun, Moon } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, Shield, Sun, Moon } from 'lucide-react';
+import TransitOpsLogo from '../components/TransitOpsLogo';
 
 const roles = ['FleetManager', 'Dispatcher', 'SafetyOfficer', 'FinancialAnalyst'];
 const roleLabels: Record<string, string> = {
@@ -80,20 +81,7 @@ export default function LoginPage() {
 
         <div className="relative">
           <div className="flex items-center gap-3 mb-12">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-dark-700 to-dark-800 border border-dark-500 flex items-center justify-center shadow-lg shadow-neutral-950/40 hover:border-accent-amber/40 transition-all duration-500 group cursor-pointer">
-              <Compass size={18} className="text-accent-amber drop-shadow-[0_0_6px_rgba(147,51,234,0.7)] group-hover:rotate-45 transition-transform duration-500" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-sm tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-100 to-accent-amber">
-                  TransitOps
-                </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-accent-amber animate-pulse shadow-[0_0_8px_#9333ea]" />
-              </div>
-              <div className="text-[8px] font-bold text-gray-500 tracking-widest uppercase mt-0.5">
-                Control Gateway
-              </div>
-            </div>
+            <TransitOpsLogo iconSize={40} showText={true} />
           </div>
 
           <h1 className="text-4xl font-bold text-white leading-snug mb-4">
@@ -136,20 +124,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="flex items-center gap-2.5 mb-8 lg:hidden">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-dark-700 to-dark-800 border border-dark-500 flex items-center justify-center shadow-lg shadow-neutral-950/40 hover:border-accent-amber/40 transition-all duration-500 group cursor-pointer">
-              <Compass size={16} className="text-accent-amber drop-shadow-[0_0_6px_rgba(147,51,234,0.7)] group-hover:rotate-45 transition-transform duration-500" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-sm tracking-wider uppercase text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-100 to-accent-amber">
-                  TransitOps
-                </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-accent-amber animate-pulse shadow-[0_0_8px_#9333ea]" />
-              </div>
-              <div className="text-[8px] font-bold text-gray-500 tracking-widest uppercase mt-0.5">
-                Control Gateway
-              </div>
-            </div>
+            <TransitOpsLogo iconSize={36} showText={true} />
           </div>
 
           <div className="mb-8">
@@ -157,20 +132,7 @@ export default function LoginPage() {
             <p className="text-gray-400 text-sm">Sign in to your operations dashboard</p>
           </div>
 
-          {/* Demo credentials hint */}
-          <div className="mb-6 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-            <p className="text-blue-300 text-xs font-medium flex items-center gap-2">
-              <Shield size={12} />
-              Demo: use any email below with password <strong>demo1234</strong>
-            </p>
-            <div className="mt-2 grid grid-cols-2 gap-1">
-              {['fleet@demo.com','dispatch@demo.com','safety@demo.com','finance@demo.com'].map(e => (
-                <button key={e} onClick={() => setEmail(e)} className="text-[10px] text-blue-400 hover:text-blue-200 text-left truncate">
-                  {e}
-                </button>
-              ))}
-            </div>
-          </div>
+
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email */}

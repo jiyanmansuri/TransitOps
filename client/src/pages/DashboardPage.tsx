@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Truck, Users, Map, Wrench, TrendingUp, Activity, Plus, Filter } from 'lucide-react';
+import { Truck, Users, Map, Wrench, TrendingUp, Activity, Plus, Filter, Inbox } from 'lucide-react';
 import api from '../api/client';
 import KPICard from '../components/KPICard';
 import StatusBadge from '../components/StatusBadge';
+import TripDetailsModal from '../components/TripDetailsModal';
 import { useAuth } from '../hooks/useAuth';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell
@@ -58,6 +59,7 @@ export default function DashboardPage() {
   // Filters State
   const [typeFilter, setTypeFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
 
   // Queries
   const { data: vehicles = [], isLoading: vehiclesLoading } = useQuery<Vehicle[]>({
@@ -93,7 +95,7 @@ export default function DashboardPage() {
   // --- Dynamic Filtering Logic ---
   const statsVehicles = vehicles.filter(v => typeFilter === 'All' || v.type.toLowerCase() === typeFilter.toLowerCase());
   const totalVehicles = statsVehicles.length;
-  const activeVehicles = statsVehicles.filter(v => v.status !== 'Retired').length;
+  const activeVehicles = statsVehicles.filter(v => v.status === 'OnTrip').length;
   const availableVehicles = statsVehicles.filter(v => v.status === 'Available').length;
   const inMaintenanceVehicles = statsVehicles.filter(v => v.status === 'InShop').length;
   const onTripVehicles = statsVehicles.filter(v => v.status === 'OnTrip').length;
@@ -151,46 +153,79 @@ export default function DashboardPage() {
     }
   };
 
+  const isFinance = user?.role === 'FinancialAnalyst';
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="page-title">Operations Dashboard</h1>
-          <p className="text-gray-500 text-sm mt-0.5">Central Command Console</p>
+          <h1 className="page-title">{isFinance ? 'Financial Dashboard' : 'Operations Dashboard'}</h1>
+          <p className="text-gray-500 text-sm mt-0.5">{isFinance ? 'Revenue & Expense Console' : 'Central Command Console'}</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-gray-400 text-xs font-mono">LIVE DATAFEED</span>
+          <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)] animate-pulse" />
+          <span className="text-emerald-400/90 text-xs font-mono font-semibold tracking-wider">LIVE DATAFEED</span>
         </div>
       </div>
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-dark-700 p-4 rounded-xl border border-dark-500">
-        <div className="flex flex-wrap gap-3 items-center">
-          <div className="flex items-center gap-2 text-gray-400 text-xs font-semibold uppercase tracking-wider">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 bg-dark-700 p-4 rounded-xl border border-dark-500">
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center w-full">
+          <div className="flex items-center gap-2 text-gray-400 text-xs font-semibold uppercase tracking-wider shrink-0">
             <Filter size={14} className="text-accent-amber" />
-            <span>Operational Filters</span>
+            <span>Filters:</span>
           </div>
-          <select
-            value={typeFilter}
-            onChange={e => setTypeFilter(e.target.value)}
-            className="select py-1.5 text-xs w-40"
-          >
-            <option value="All">All Vehicle Types</option>
-            {vehicleTypes.map(t => <option key={t} value={t}>{t}</option>)}
-          </select>
-          <select
-            value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value)}
-            className="select py-1.5 text-xs w-40"
-          >
-            <option value="All">All Statuses</option>
-            <option value="Draft">Draft</option>
-            <option value="Dispatched">Dispatched</option>
-            <option value="Completed">Completed</option>
-            <option value="Cancelled">Cancelled</option>
-          </select>
+          
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={typeFilter}
+              onChange={e => setTypeFilter(e.target.value)}
+              className="select py-1.5 text-xs w-40 bg-dark-600 border-dark-500"
+            >
+              <option value="All">All Types</option>
+              {vehicleTypes.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+
+            <div className="h-6 w-px bg-dark-500 mx-2 hidden md:block" />
+
+            <div className="flex items-center gap-1 overflow-x-auto w-full md:w-auto">
+              {[
+                { id: 'All', label: 'All' },
+                { id: 'Draft', label: 'Draft' },
+                { id: 'Dispatched', label: 'Dispatched' },
+                { id: 'Completed', label: 'Completed' },
+                { id: 'Cancelled', label: 'Cancelled' }
+              ].map(tab => {
+                const count = trips.filter(t => {
+                  const vehicle = vehicles.find(v => v.id === t.vehicleId);
+                  if (!vehicle) return false;
+                  const matchesType = typeFilter === 'All' || vehicle.type.toLowerCase() === typeFilter.toLowerCase();
+                  if (!matchesType) return false;
+                  return tab.id === 'All' || t.status === tab.id;
+                }).length;
+
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setStatusFilter(tab.id)}
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5 ${
+                      statusFilter === tab.id 
+                        ? 'bg-dark-500 text-white' 
+                        : 'text-gray-400 hover:bg-dark-600 hover:text-gray-200'
+                    }`}
+                  >
+                    {tab.label}
+                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${
+                      statusFilter === tab.id ? 'bg-accent-amber/20 text-accent-amber' : 'bg-dark-700 text-gray-500'
+                    }`}>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
         
         {isDispatcher ? (
@@ -221,9 +256,9 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts and Tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Trips */}
-        <div className="lg:col-span-3 card flex flex-col">
+        <div className="card flex flex-col">
           <h2 className="section-title">Operational Log</h2>
           <div className="overflow-x-auto flex-1">
             <table className="w-full">
@@ -238,14 +273,25 @@ export default function DashboardPage() {
               <tbody>
                 {statsTrips.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="table-cell text-center text-gray-500 py-12">
-                      No operational logs match the active filter.
+                    <td colSpan={4} className="table-cell p-0">
+                      <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <div className="w-16 h-16 bg-dark-600 rounded-full flex items-center justify-center mb-4">
+                          <Inbox size={24} className="text-gray-500" />
+                        </div>
+                        <p className="text-gray-300 font-medium mb-1">No trips found</p>
+                        <p className="text-gray-500 text-sm">There are no operational logs matching the active filter.</p>
+                      </div>
                     </td>
                   </tr>
                 ) : (
                   statsTrips.slice(0, 7).map(trip => (
                     <tr key={trip.id} className="table-row">
-                      <td className="table-cell font-mono text-accent-amber font-semibold">{trip.tripCode}</td>
+                      <td 
+                        className="table-cell font-mono text-accent-amber font-semibold cursor-pointer hover:underline"
+                        onClick={() => setSelectedTrip(trip)}
+                      >
+                        {trip.tripCode}
+                      </td>
                       <td className="table-cell text-gray-300">
                         {trip.source} <span className="text-gray-600">→</span> {trip.destination}
                       </td>
@@ -259,9 +305,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Vehicle Status Breakdown */}
-        <div className="lg:col-span-2 card">
-          <h2 className="section-title">Asset Deployment Status</h2>
+        {/* Charts Column */}
+        <div className="flex flex-col gap-6">
+          {/* Vehicle Status Breakdown */}
+          <div className="card">
+            <h2 className="section-title">Asset Deployment Status</h2>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={statusBarData} layout="vertical" margin={{ left: 10, right: 20 }}>
               <XAxis type="number" tick={{ fill: '#9ca3af', fontSize: 10 }} axisLine={false} tickLine={false} />
@@ -295,31 +343,34 @@ export default function DashboardPage() {
             ))}
           </div>
         </div>
-      </div>
 
-      {/* Monthly Revenue Chart */}
-      {monthlyRevenueArr.length > 0 && (
-        <div className="card">
-          <h2 className="section-title">Monthly Revenue (₹) — Filtered</h2>
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={monthlyRevenueArr} margin={{ left: 0, right: 20 }}>
-              <XAxis dataKey="month" tick={{ fill: '#9ca3af', fontSize: 10 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: '#9ca3af', fontSize: 10 }} axisLine={false} tickLine={false} />
-              <Tooltip
-                contentStyle={{
-                  background: 'rgb(var(--color-dark-700))',
-                  border: '1px solid rgb(var(--color-dark-500))',
-                  borderRadius: 8,
-                }}
-                labelStyle={{ color: 'rgb(var(--color-gray-400))' }}
-                itemStyle={{ color: 'rgb(var(--color-gray-100))' }}
-                formatter={(v: number) => [`₹${v.toLocaleString()}`, 'Revenue']}
-              />
-              <Bar dataKey="revenue" fill="#d97706" radius={[4, 4, 0, 0]} maxBarSize={48} />
-            </BarChart>
-          </ResponsiveContainer>
+        {/* Monthly Revenue Chart */}
+        {monthlyRevenueArr.length > 0 && (
+          <div className="card">
+              <h2 className="section-title">Monthly Revenue (₹) — Filtered</h2>
+              <ResponsiveContainer width="100%" height={180}>
+                <BarChart data={monthlyRevenueArr} margin={{ left: 0, right: 20 }}>
+                  <XAxis dataKey="month" tick={{ fill: '#9ca3af', fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: '#9ca3af', fontSize: 10 }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{
+                      background: 'rgb(var(--color-dark-700))',
+                      border: '1px solid rgb(var(--color-dark-500))',
+                      borderRadius: 8,
+                    }}
+                    labelStyle={{ color: 'rgb(var(--color-gray-400))' }}
+                    itemStyle={{ color: 'rgb(var(--color-gray-100))' }}
+                    formatter={(v: number) => [`₹${v.toLocaleString()}`, 'Revenue']}
+                  />
+                  <Bar dataKey="revenue" fill="#d97706" radius={[4, 4, 0, 0]} maxBarSize={48} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
-      )}
+      </div>
+      
+      {selectedTrip && <TripDetailsModal trip={selectedTrip} onClose={() => setSelectedTrip(null)} />}
     </div>
   );
 }

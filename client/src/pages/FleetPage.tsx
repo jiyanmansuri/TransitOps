@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Pencil, Trash2, Truck, FileText, Trash } from 'lucide-react';
+import { Plus, Pencil, Trash2, Truck, FileText, Trash, CheckCircle, AlertCircle } from 'lucide-react';
 import api from '../api/client';
 import StatusBadge from '../components/StatusBadge';
 import Modal from '../components/Modal';
@@ -16,6 +16,7 @@ interface Vehicle {
   odometer: number;
   acquisitionCost: number;
   status: string;
+  documents?: VehicleDocument[];
 }
 
 interface VehicleDocument {
@@ -81,6 +82,9 @@ export default function FleetPage() {
     queryFn: () => api.get('/vehicles', { params: { type: typeFilter, status: statusFilter, search } }).then(r => r.data),
   });
 
+  const isFinance = user?.role === 'FinancialAnalyst';
+  const totalFleetValue = vehicles.reduce((sum, v) => sum + (v.acquisitionCost || 0), 0);
+
   const saveMutation = useMutation({
     mutationFn: (data: typeof form) =>
       editVehicle
@@ -138,6 +142,20 @@ export default function FleetPage() {
         )}
       </div>
 
+      {isFinance && (
+        <div className="bg-dark-700 p-5 rounded-xl border border-dark-500 flex flex-wrap gap-8 items-center">
+          <div>
+            <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Total Fleet Asset Value</p>
+            <p className="text-2xl font-bold text-accent-amber">₹{totalFleetValue.toLocaleString()}</p>
+          </div>
+          <div className="h-10 w-px bg-dark-500 hidden sm:block" />
+          <div>
+            <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">Total Assets</p>
+            <p className="text-xl font-bold text-white">{vehicles.length}</p>
+          </div>
+        </div>
+      )}
+
       {/* Filters */}
       <div className="flex gap-3 flex-wrap">
         <input
@@ -157,65 +175,80 @@ export default function FleetPage() {
       </div>
 
       {/* Table */}
-      <div className="card p-0 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-dark-600">
-              <tr>
-                <th className="table-header">Reg. Number</th>
-                <th className="table-header">Model</th>
-                <th className="table-header">Type</th>
-                <th className="table-header">Capacity (kg)</th>
-                <th className="table-header">Odometer (km)</th>
-                <th className="table-header">Acq. Cost (₹)</th>
-                <th className="table-header">Status</th>
-                <th className="table-header">Documents</th>
-                {canEdit && <th className="table-header">Actions</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr><td colSpan={9} className="table-cell text-center text-gray-500 py-12">Loading...</td></tr>
-              ) : vehicles.length === 0 ? (
-                <tr><td colSpan={9} className="table-cell text-center text-gray-500 py-12">
-                  <Truck size={32} className="mx-auto mb-3 opacity-30" />
-                  No vehicles found
-                </td></tr>
-              ) : vehicles.map(v => (
-                <tr key={v.id} className="table-row">
-                  <td className="table-cell font-mono font-semibold text-accent-amber">{v.registrationNumber}</td>
-                  <td className="table-cell text-white font-medium">{v.nameModel}</td>
-                  <td className="table-cell text-gray-400">{v.type}</td>
-                  <td className="table-cell tabular-nums">{v.maxLoadCapacityKg.toLocaleString()}</td>
-                  <td className="table-cell tabular-nums">{v.odometer.toLocaleString()}</td>
-                  <td className="table-cell tabular-nums">₹{v.acquisitionCost.toLocaleString()}</td>
-                  <td className="table-cell"><StatusBadge status={v.status} size="sm" /></td>
-                  <td className="table-cell">
-                    <button
-                      onClick={() => setSelectedDocVehicle(v)}
-                      className="btn-secondary py-1 px-2.5 text-xs flex items-center gap-1.5 border border-dark-500 hover:border-accent-amber/40"
-                    >
-                      <FileText size={12} /> Docs
-                    </button>
-                  </td>
-                  {canEdit && (
-                    <td className="table-cell">
-                      <div className="flex gap-2">
-                        <button onClick={() => openEdit(v)} className="p-1.5 text-gray-400 hover:text-white hover:bg-dark-500 rounded transition-colors">
-                          <Pencil size={14} />
-                        </button>
-                        <button onClick={() => { if (confirm('Delete vehicle?')) deleteMutation.mutate(v.id); }} className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded transition-colors">
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-t-2 border-accent-amber" /></div>
+      ) : vehicles.length === 0 ? (
+        <div className="card flex flex-col items-center justify-center py-20 text-center border-dashed border-2 border-dark-500 bg-dark-700/30">
+          <div className="w-16 h-16 bg-dark-600 rounded-full flex items-center justify-center mb-4">
+            <Truck size={24} className="text-gray-500" />
+          </div>
+          <h3 className="text-lg font-medium text-white mb-2">No vehicles found</h3>
+          <p className="text-gray-400 text-sm max-w-sm">There are no vehicles in the registry matching your current criteria ("{typeFilter}" / "{statusFilter}").</p>
         </div>
-      </div>
+      ) : (
+        <div className="card p-0 overflow-hidden">
+          <div className="overflow-x-auto overflow-y-auto max-h-[65vh]">
+            <table className="w-full relative">
+              <thead className="bg-dark-600 sticky top-0 z-10 shadow-sm">
+                <tr>
+                  <th className="table-header">Reg. Number</th>
+                  <th className="table-header">Model</th>
+                  <th className="table-header">Type</th>
+                  <th className="table-header">Capacity (kg)</th>
+                  <th className="table-header">Odometer (km)</th>
+                  <th className="table-header">Acq. Cost (₹)</th>
+                  <th className="table-header">Status</th>
+                  <th className="table-header">Documents</th>
+                  {canEdit && <th className="table-header">Actions</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {vehicles.map(v => {
+                  const hasValidDocs = v.documents && v.documents.length > 0 && v.documents.every(d => new Date(d.expiryDate) > new Date());
+                  const hasExpiringDocs = v.documents && v.documents.some(d => new Date(d.expiryDate) < new Date());
+
+                  return (
+                    <tr key={v.id} className="table-row">
+                      <td className="table-cell font-mono font-semibold text-accent-amber">{v.registrationNumber}</td>
+                      <td className="table-cell text-white font-medium">{v.nameModel}</td>
+                      <td className="table-cell text-gray-400">{v.type}</td>
+                      <td className="table-cell tabular-nums">{v.maxLoadCapacityKg.toLocaleString()}</td>
+                      <td className="table-cell tabular-nums">{v.odometer.toLocaleString()}</td>
+                      <td className="table-cell tabular-nums">₹{v.acquisitionCost.toLocaleString()}</td>
+                      <td className="table-cell"><StatusBadge status={v.status} size="sm" /></td>
+                      <td className="table-cell">
+                        <button
+                          onClick={() => setSelectedDocVehicle(v)}
+                          className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium border transition-colors ${
+                            hasExpiringDocs || !v.documents?.length
+                              ? 'bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20'
+                              : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'
+                          }`}
+                        >
+                          {hasExpiringDocs || !v.documents?.length ? <AlertCircle size={12} /> : <CheckCircle size={12} />}
+                          {v.documents?.length || 0} Docs
+                        </button>
+                      </td>
+                      {canEdit && (
+                        <td className="table-cell">
+                          <div className="flex gap-2">
+                            <button onClick={() => openEdit(v)} className="p-1.5 text-gray-400 hover:text-white hover:bg-dark-500 rounded transition-colors">
+                              <Pencil size={14} />
+                            </button>
+                            <button onClick={() => { if (confirm('Delete vehicle?')) deleteMutation.mutate(v.id); }} className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-400/10 rounded transition-colors">
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* Add/Edit Modal */}
       {showModal && (
