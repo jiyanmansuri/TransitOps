@@ -184,7 +184,7 @@ export default function FleetPage() {
               ) : vehicles.map(v => (
                 <tr key={v.id} className="table-row">
                   <td className="table-cell font-mono font-semibold text-accent-amber">{v.registrationNumber}</td>
-                  <td className="table-cell text-gray-100 font-medium">{v.nameModel}</td>
+                  <td className="table-cell text-white font-medium">{v.nameModel}</td>
                   <td className="table-cell text-gray-400">{v.type}</td>
                   <td className="table-cell tabular-nums">{v.maxLoadCapacityKg.toLocaleString()}</td>
                   <td className="table-cell tabular-nums">{v.odometer.toLocaleString()}</td>

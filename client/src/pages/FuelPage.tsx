@@ -108,17 +108,17 @@ export default function FuelPage() {
       <div className="grid grid-cols-3 gap-4">
         <div className="card border-l-4 border-l-amber-500">
           <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Total Fuel Cost</p>
-          <p className="text-2xl font-bold text-gray-100">₹{(summary?.totalFuelCost || 0).toLocaleString()}</p>
+          <p className="text-2xl font-bold text-white">₹{(summary?.totalFuelCost || 0).toLocaleString()}</p>
           <p className="text-xs text-gray-500 mt-1">{totalLiters.toFixed(1)}L total consumed</p>
         </div>
         <div className="card border-l-4 border-l-red-500">
           <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Maintenance Cost</p>
-          <p className="text-2xl font-bold text-gray-100">₹{(summary?.totalMaintenanceCost || 0).toLocaleString()}</p>
+          <p className="text-2xl font-bold text-white">₹{(summary?.totalMaintenanceCost || 0).toLocaleString()}</p>
           <p className="text-xs text-gray-500 mt-1">All service records</p>
         </div>
         <div className="card border-l-4 border-l-purple-500">
           <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Total Operational Cost</p>
-          <p className="text-2xl font-bold text-gray-100">₹{(summary?.totalOperationalCost || 0).toLocaleString()}</p>
+          <p className="text-2xl font-bold text-white">₹{(summary?.totalOperationalCost || 0).toLocaleString()}</p>
           <p className="text-xs text-gray-500 mt-1">Fuel + Maintenance (auto)</p>
         </div>
       </div>
@@ -154,7 +154,7 @@ export default function FuelPage() {
                   </td>
                   <td className="table-cell text-gray-400">{new Date(l.date).toLocaleDateString('en-IN')}</td>
                   <td className="table-cell tabular-nums text-gray-300">{l.liters.toFixed(1)}L</td>
-                  <td className="table-cell tabular-nums text-gray-100 font-semibold">₹{l.cost.toLocaleString()}</td>
+                  <td className="table-cell tabular-nums text-white font-semibold">₹{l.cost.toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -198,7 +198,7 @@ export default function FuelPage() {
                   <td className="table-cell tabular-nums text-gray-300">{e.toll.toLocaleString()}</td>
                   <td className="table-cell tabular-nums text-gray-300">{e.other.toLocaleString()}</td>
                   <td className="table-cell tabular-nums text-gray-400">{e.maintenanceLinkedCost.toLocaleString()}</td>
-                  <td className="table-cell tabular-nums text-gray-100 font-bold">₹{e.total.toLocaleString()}</td>
+                  <td className="table-cell tabular-nums text-white font-bold">₹{e.total.toLocaleString()}</td>
                   <td className="table-cell"><StatusBadge status={e.status} size="sm" /></td>
                 </tr>
               ))}

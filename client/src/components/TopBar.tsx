@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, AlertTriangle, ShieldAlert, Wrench, Navigation, CheckCircle, Truck, User, MapPin, Sun, Moon } from 'lucide-react';
+import { Search, Bell, AlertTriangle, ShieldAlert, Wrench, Navigation, CheckCircle, Truck, User, MapPin } from 'lucide-react';
 import api from '../api/client';
 import { useAuth } from '../hooks/useAuth';
 
@@ -43,20 +43,6 @@ export default function TopBar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
-
-  // Theme Toggling State
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
-
-  useEffect(() => {
-    if (theme === 'light') {
-      document.documentElement.classList.add('light');
-    } else {
-      document.documentElement.classList.remove('light');
-    }
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
   
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -154,7 +140,7 @@ export default function TopBar() {
   }, []);
 
   return (
-    <header className="h-14 bg-dark-800 border-b border-dark-500 flex items-center px-6 gap-4 sticky top-0 z-40">
+    <header className="h-14 bg-dark-900 border-b border-dark-500 flex items-center px-6 gap-4 sticky top-0 z-40">
       {/* Global Search Engine */}
       <div className="flex-1 max-w-sm relative" ref={searchRef}>
         <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -199,7 +185,7 @@ export default function TopBar() {
                         className="w-full text-left p-2 hover:bg-dark-600 rounded-lg flex items-center gap-2.5 text-xs text-gray-200"
                       >
                         <Truck size={14} className="text-gray-400" />
-                        <span className="font-mono font-bold text-gray-100">{v.registrationNumber}</span>
+                        <span className="font-mono font-bold text-white">{v.registrationNumber}</span>
                         <span className="text-gray-500">—</span>
                         <span>{v.nameModel}</span>
                       </button>
@@ -222,7 +208,7 @@ export default function TopBar() {
                         className="w-full text-left p-2 hover:bg-dark-600 rounded-lg flex items-center gap-2.5 text-xs text-gray-200"
                       >
                         <User size={14} className="text-gray-400" />
-                        <span className="font-bold text-gray-100">{d.name}</span>
+                        <span className="font-bold text-white">{d.name}</span>
                         <span className="text-gray-500">—</span>
                         <span className="font-mono text-[10px] text-gray-400">{d.licenseNumber}</span>
                       </button>
@@ -245,7 +231,7 @@ export default function TopBar() {
                         className="w-full text-left p-2 hover:bg-dark-600 rounded-lg flex items-center gap-2.5 text-xs text-gray-200"
                       >
                         <MapPin size={14} className="text-gray-400" />
-                        <span className="font-mono font-bold text-gray-100">{t.tripCode}</span>
+                        <span className="font-mono font-bold text-white">{t.tripCode}</span>
                         <span className="text-gray-500">—</span>
                         <span>{t.source} to {t.destination}</span>
                       </button>
@@ -259,15 +245,6 @@ export default function TopBar() {
       </div>
 
       <div className="flex-1" />
-
-      {/* Theme Toggle Button */}
-      <button
-        onClick={toggleTheme}
-        className="p-2 rounded-lg text-gray-400 hover:text-gray-100 hover:bg-dark-600 transition-colors mr-1"
-        title="Toggle Theme"
-      >
-        {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
-      </button>
 
       {/* Notification Bell Dropdown */}
       <div className="relative" ref={dropdownRef}>
@@ -284,7 +261,7 @@ export default function TopBar() {
         {showNotifications && (
           <div className="absolute right-0 mt-2 w-80 bg-dark-700 border border-dark-500 rounded-xl shadow-2xl overflow-hidden z-50">
             <div className="p-3 bg-dark-600 border-b border-dark-500 flex items-center justify-between">
-              <span className="text-xs font-bold text-gray-100 uppercase tracking-wider">Live System Alerts</span>
+              <span className="text-xs font-bold text-white uppercase tracking-wider">Live System Alerts</span>
               <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent-amber/20 text-accent-amber-light font-bold font-mono">
                 {alerts.length} Warnings
               </span>
@@ -301,7 +278,7 @@ export default function TopBar() {
                   <div key={a.id} className="p-3 hover:bg-dark-600/50 transition-colors flex gap-2.5 items-start">
                     <div className="mt-0.5 flex-shrink-0">{a.icon}</div>
                     <div className="space-y-0.5">
-                      <div className="text-xs font-bold text-gray-100 leading-tight">{a.title}</div>
+                      <div className="text-xs font-bold text-white leading-tight">{a.title}</div>
                       <div className="text-[10px] text-gray-400 leading-normal">{a.message}</div>
                     </div>
                   </div>
@@ -324,7 +301,7 @@ export default function TopBar() {
       {/* User Info */}
       <div className="flex items-center gap-3">
         <div className="text-right">
-          <div className="text-sm font-semibold text-gray-100 leading-tight">{user?.name}</div>
+          <div className="text-sm font-semibold text-white leading-tight">{user?.name}</div>
           <div className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full inline-block mt-0.5 ${roleColors[user?.role || ''] || 'bg-gray-500/20 text-gray-300'}`}>
             {user?.role}
           </div>

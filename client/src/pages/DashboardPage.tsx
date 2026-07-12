@@ -285,7 +285,7 @@ export default function DashboardPage() {
               <div key={s.key} className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: STATUS_COLORS[s.key as keyof typeof STATUS_COLORS] || '#6b7280' }} />
                 <span className="text-xs text-gray-400">
-                  {s.name}: <span className="text-gray-100 font-semibold">{s.value}</span>
+                  {s.name}: <span className="text-white font-semibold">{s.value}</span>
                 </span>
               </div>
             ))}

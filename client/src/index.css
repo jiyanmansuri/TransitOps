@@ -3,41 +3,10 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg-canvas: 0 0 0;
-  --bg-surface-elevated: 0 0 0;
-  --bg-surface-card: 15 15 18;
-  --bg-surface-row: 21 21 28;
-  --border-line: 30 30 38;
-  --border-focus: 44 44 56;
-  
-  --text-main: 243 244 246;
-  --text-main-muted: 229 231 235;
-  --text-muted: 156 163 175;
-  --text-sub: 107 114 128;
-  --text-muted-dark: 75 85 99;
-}
-
-html.light {
-  --bg-canvas: 248 250 252;
-  --bg-surface-elevated: 255 255 255;
-  --bg-surface-card: 255 255 255;
-  --bg-surface-row: 241 245 249;
-  --border-line: 203 213 225;
-  --border-focus: 148 163 184;
-  
-  --text-main: 15 23 42;
-  --text-main-muted: 30 41 59;
-  --text-muted: 71 85 105;
-  --text-sub: 100 116 139;
-  --text-muted-dark: 148 163 184;
-}
-
 @layer base {
   * { box-sizing: border-box; }
   body {
-    background-color: rgb(var(--bg-canvas));
-    color: rgb(var(--text-main));
+    @apply bg-dark-900 text-gray-100 font-sans;
     font-size: 14px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -80,7 +49,7 @@ html.light {
     @apply hover:bg-dark-600/30 transition-all duration-200;
   }
   .page-title {
-    @apply text-2xl font-extrabold text-gray-100 tracking-tight;
+    @apply text-2xl font-extrabold text-white tracking-tight;
   }
   .section-title {
     @apply text-sm font-bold text-gray-400 uppercase tracking-wider mb-5 flex items-center gap-2;

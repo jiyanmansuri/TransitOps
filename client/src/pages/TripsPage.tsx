@@ -196,7 +196,7 @@ export default function TripsPage() {
                   <span className="font-mono text-accent-amber font-bold text-sm">{trip.tripCode}</span>
                   <StatusBadge status={trip.status} size="sm" />
                 </div>
-                <div className="flex items-center gap-1.5 text-sm text-gray-100 font-medium mb-2">
+                <div className="flex items-center gap-1.5 text-sm text-white font-medium mb-2">
                   <span>{trip.source}</span>
                   <Navigation size={12} className="text-blue-400" />
                   <span>{trip.destination}</span>
@@ -243,7 +243,7 @@ export default function TripsPage() {
                 <tr key={trip.id} className="table-row">
                   <td className="table-cell font-mono text-accent-amber font-bold">{trip.tripCode}</td>
                   <td className="table-cell text-sm">
-                    <span className="text-gray-100">{trip.source}</span>
+                    <span className="text-white">{trip.source}</span>
                     <span className="text-gray-600 mx-1">→</span>
                     <span className="text-gray-300">{trip.destination}</span>
                   </td>

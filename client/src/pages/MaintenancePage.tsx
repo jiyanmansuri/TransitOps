@@ -117,7 +117,7 @@ export default function MaintenancePage() {
                   <div className="flex items-center gap-3 mb-1">
                     <span className="font-mono text-accent-amber font-semibold text-sm">{r.vehicle?.registrationNumber}</span>
                     <span className="text-gray-300 text-sm">—</span>
-                    <span className="text-gray-100 text-sm">{r.vehicle?.nameModel}</span>
+                    <span className="text-white text-sm">{r.vehicle?.nameModel}</span>
                     <StatusBadge status="InShop" size="sm" />
                   </div>
                   <div className="text-sm font-medium text-gray-200 mb-1">{r.serviceType}</div>
@@ -167,7 +167,7 @@ export default function MaintenancePage() {
                     <div className="font-mono text-accent-amber text-xs">{r.vehicle?.registrationNumber}</div>
                     <div className="text-gray-400 text-xs">{r.vehicle?.nameModel}</div>
                   </td>
-                  <td className="table-cell text-gray-100">{r.serviceType}</td>
+                  <td className="table-cell text-white">{r.serviceType}</td>
                   <td className="table-cell tabular-nums text-gray-300">₹{r.cost.toLocaleString()}</td>
                   <td className="table-cell text-gray-400">{new Date(r.date).toLocaleDateString('en-IN')}</td>
                   <td className="table-cell">
