@@ -1,7 +1,7 @@
-# TransitOps: Enterprise Fleet & Smart Operations Management System
-### *Odoo Ecosystem Integration Blueprint & Operational Command Center*
+# TransitOps — Enterprise Fleet & Operations Management System
+### *Modular ERP Core Integration Blueprint & Operational Command Center*
 
-TransitOps is a unified, full-stack logistics resource planning (LRP) engine designed to bridge the gap between **Fleet Management**, **Human Resources**, **Maintenance Operations**, and **Financial Ledger Systems**. Built as a high-performance prototype for enterprise logistics pipelines, it demonstrates a complete state-synchronization machine, role-based access controls (RBAC), and transactional compliance.
+TransitOps is a unified, full-stack logistics resource planning (LRP) engine designed to bridge the gap between **Fleet Management**, **Human Resources (HR)**, **Maintenance Operations**, and **Financial Ledger Systems**. Built as a high-performance prototype for enterprise logistics pipelines, it demonstrates a complete state-synchronization machine, role-based access controls (RBAC), and transactional compliance.
 
 ---
 
@@ -63,33 +63,33 @@ $$\text{Fleet Utilization} = \frac{\text{Vehicles On Trip}}{\text{Total Fleet (E
 
 ---
 
-## 🔌 Odoo Integration Strategy (API Blueprint)
+## 🔌 Modular ERP Core Integration Strategy (API Blueprint)
 
-TransitOps is designed to serve as a high-speed operational gateway that interfaces with an **Odoo ERP** instance (supporting Odoo Enterprise v16/v17). By leveraging Odoo's external API connector, TransitOps acts as the real-time driver/dispatcher interface while syncing core accounting data back to Odoo.
+TransitOps is designed to serve as a high-speed operational gateway that interfaces with standard **Enterprise ERP** instances. By leveraging standard API connectors, TransitOps acts as the real-time driver/dispatcher interface while syncing core accounting and HR data back to the central ERP.
 
 ```text
   [ TransitOps Client ]  <--->  [ TransitOps Server ]
                                           |
-                                    (JSON-RPC API)
+                                    (JSON-RPC / REST)
                                           |
                                           v
                       +---------------------------------------+
-                      |               Odoo ERP                |
-                      |  - hr.employee (Drivers)              |
-                      |  - fleet.vehicle (Assets)             |
-                      |  - account.move (Expenses / Invoices)  |
+                      |         Enterprise ERP Core           |
+                      |  - HR Employees (Drivers)             |
+                      |  - Fleet Assets (Vehicles)            |
+                      |  - Accounting Ledger (Expenses)       |
                       +---------------------------------------+
 ```
 
 ### Model Mapping Blueprint
 
-| TransitOps Model | Odoo Core Model | Sync Trigger |
+| TransitOps Model | ERP Core Model | Sync Trigger |
 | :--- | :--- | :--- |
-| **Driver** | `hr.employee` (with driver license attributes) | Onboarded driver syncs to Odoo HR. |
-| **Vehicle** | `fleet.vehicle` | Asset registration syncs to Odoo Fleet module. |
-| **FuelLog** | `fleet.vehicle.log.fuel` | Trip completion creates a fuel expense line in Odoo. |
-| **Expense** | `account.move` / `hr.expense` | Tolls and incidentals post directly as journal entries. |
-| **MaintenanceRecord** | `fleet.vehicle.log.services` | Active service logs register in Odoo Maintenance. |
+| **Driver** | `hr_employee` (with license attributes) | Onboarded driver syncs to ERP HR directory. |
+| **Vehicle** | `fleet_vehicle` | Asset registration syncs to ERP Asset Management. |
+| **FuelLog** | `fleet_vehicle_log_fuel` | Trip completion creates a fuel expense line in ERP. |
+| **Expense** | `account_move_line` / `hr_expense` | Tolls and incidentals post directly as journal entries. |
+| **MaintenanceRecord** | `fleet_vehicle_log_services` | Active service logs register in ERP Maintenance module. |
 
 ---
 
@@ -129,7 +129,7 @@ npm run dev
 
 ## 🔐 Role-Based Access Control (RBAC) Matrix
 
-transitOps enforces route guarding on both the UI navigation and API endpoints according to the following permissions:
+TransitOps enforces route guarding on both the UI navigation and API endpoints according to the following permissions:
 
 | Access Role | Fleet Module | Drivers Module | Trips Module | Fuel/Exp Module | Analytics Module |
 | :--- | :---: | :---: | :---: | :---: | :---: |
